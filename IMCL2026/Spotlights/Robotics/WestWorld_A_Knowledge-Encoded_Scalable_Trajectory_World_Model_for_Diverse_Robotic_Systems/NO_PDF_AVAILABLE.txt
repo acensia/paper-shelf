@@ -1,0 +1,5 @@
+WestWorld: A Knowledge-Encoded Scalable Trajectory World Model for Diverse Robotic Systems
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.00).
+OpenReview: https://openreview.net/forum?id=ncRRCG4BfP
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

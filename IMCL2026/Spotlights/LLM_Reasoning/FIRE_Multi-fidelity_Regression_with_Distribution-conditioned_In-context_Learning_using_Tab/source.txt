@@ -1,0 +1,4 @@
+FIRE: Multi-fidelity Regression with Distribution-conditioned In-context Learning using Tabular Foundation Models
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.22371
+OpenReview: https://openreview.net/forum?id=JxbxHB5d9v

@@ -1,0 +1,4 @@
+Mitigating Reward Hacking in RLHF via Bayesian Non-negative Reward Modeling
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.10623
+OpenReview: https://openreview.net/forum?id=DfhMMHXDuu

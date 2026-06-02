@@ -1,0 +1,4 @@
+When the Prompt Becomes Visual: Vision-Centric Jailbreak Attacks for Large Image Editing Models
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.10179
+OpenReview: https://openreview.net/forum?id=wQxRphkfxn

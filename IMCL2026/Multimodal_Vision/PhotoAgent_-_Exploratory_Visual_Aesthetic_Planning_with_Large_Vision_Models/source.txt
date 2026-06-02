@@ -1,0 +1,4 @@
+PhotoAgent - Exploratory Visual Aesthetic Planning with Large Vision Models
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2602.22809
+PDF: https://arxiv.org/pdf/2602.22809

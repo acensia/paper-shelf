@@ -1,0 +1,4 @@
+How RL Unlocks the Aha Moment in Geometric Interleaved Reasoning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.01070
+OpenReview: https://openreview.net/forum?id=JT4zAf3zDs

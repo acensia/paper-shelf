@@ -1,0 +1,4 @@
+The Signal is in the Steps: Local Scoring for Reasoning Data Selection
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2510.03988
+OpenReview: https://openreview.net/forum?id=GcB3a6IonG

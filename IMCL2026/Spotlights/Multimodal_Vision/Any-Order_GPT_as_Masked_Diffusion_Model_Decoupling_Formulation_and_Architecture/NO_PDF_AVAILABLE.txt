@@ -1,0 +1,5 @@
+Any-Order GPT as Masked Diffusion Model: Decoupling Formulation and Architecture
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.00).
+OpenReview: https://openreview.net/forum?id=sEYoG3tAXN
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

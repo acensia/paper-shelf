@@ -1,0 +1,4 @@
+Position: Assistive Agents Need Accessibility Alignment
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.13579
+OpenReview: https://openreview.net/forum?id=aAQNmZxEJa

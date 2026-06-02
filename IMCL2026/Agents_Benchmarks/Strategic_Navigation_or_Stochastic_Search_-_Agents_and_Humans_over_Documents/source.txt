@@ -1,0 +1,4 @@
+Strategic Navigation or Stochastic Search - Agents and Humans over Documents
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2603.12180
+PDF: https://arxiv.org/pdf/2603.12180

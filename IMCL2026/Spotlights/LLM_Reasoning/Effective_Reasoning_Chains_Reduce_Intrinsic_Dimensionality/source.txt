@@ -1,0 +1,4 @@
+Effective Reasoning Chains Reduce Intrinsic Dimensionality
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.09276
+OpenReview: https://openreview.net/forum?id=vCjGjvrIR9

@@ -1,0 +1,4 @@
+Steer Like the LLM: Activation Steering that Mimics Prompting
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.03907
+OpenReview: https://openreview.net/forum?id=06Nk3dJDMq

@@ -1,0 +1,4 @@
+Pretrained Vision-Language-Action Models are Surprisingly Resistant to Forgetting in Continual Learning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.03818
+OpenReview: https://openreview.net/forum?id=VzdSHEab4G

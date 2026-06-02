@@ -1,0 +1,4 @@
+Learning Structured Reasoning via Tractable Trajectory Control
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.01641
+OpenReview: https://openreview.net/forum?id=x6J7va4BYz

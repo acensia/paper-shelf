@@ -1,0 +1,4 @@
+LaST$_{0}$: Latent Spatio-Temporal Chain-of-Thought for Robotic Vision-Language-Action Model
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.05248
+OpenReview: https://openreview.net/forum?id=lwOoBzJykL

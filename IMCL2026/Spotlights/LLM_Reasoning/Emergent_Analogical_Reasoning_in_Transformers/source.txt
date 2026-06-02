@@ -1,0 +1,4 @@
+Emergent Analogical Reasoning in Transformers
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.01992
+OpenReview: https://openreview.net/forum?id=GxTkgMBiz8

@@ -1,0 +1,4 @@
+PonderLM-2: Pretraining LLM with Latent Thoughts in Continuous Space
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2509.23184
+OpenReview: https://openreview.net/forum?id=yVFxjNzCQm

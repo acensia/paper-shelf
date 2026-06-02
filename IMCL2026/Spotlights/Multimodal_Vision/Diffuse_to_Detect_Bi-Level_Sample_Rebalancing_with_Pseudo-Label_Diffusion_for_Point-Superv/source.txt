@@ -1,0 +1,4 @@
+Diffuse to Detect: Bi-Level Sample Rebalancing with Pseudo-Label Diffusion for Point-Supervised Infrared Small-Target Detection
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.20766
+OpenReview: https://openreview.net/forum?id=RNn2wtNeoK

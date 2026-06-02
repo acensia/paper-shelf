@@ -1,0 +1,4 @@
+Less is Enough - Synthesizing Diverse Data in LLM Feature Space
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2602.10388
+PDF: https://arxiv.org/pdf/2602.10388

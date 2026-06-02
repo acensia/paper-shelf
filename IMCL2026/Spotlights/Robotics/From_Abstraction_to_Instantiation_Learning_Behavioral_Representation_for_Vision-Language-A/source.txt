@@ -1,0 +1,4 @@
+From Abstraction to Instantiation: Learning Behavioral Representation for Vision-Language-Action Model
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.22671
+OpenReview: https://openreview.net/forum?id=2NRrsz4nUB

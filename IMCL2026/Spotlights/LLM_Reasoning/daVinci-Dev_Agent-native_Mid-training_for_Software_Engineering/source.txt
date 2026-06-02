@@ -1,0 +1,4 @@
+daVinci-Dev: Agent-native Mid-training for Software Engineering
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.18418
+OpenReview: https://openreview.net/forum?id=a86luANykT

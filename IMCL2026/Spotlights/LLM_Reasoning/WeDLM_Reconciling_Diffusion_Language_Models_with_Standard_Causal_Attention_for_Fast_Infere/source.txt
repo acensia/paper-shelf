@@ -1,0 +1,4 @@
+WeDLM: Reconciling Diffusion Language Models with Standard Causal Attention for Fast Inference
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2512.22737
+OpenReview: https://openreview.net/forum?id=QwtmbKAOZU

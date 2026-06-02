@@ -1,0 +1,4 @@
+ADEPT: RL-Aligned Agentic Decoding of Emotion via Evidence Probing Tools — From Consensus Learning to Ambiguity-Driven Emotion Reasoning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.12714
+OpenReview: https://openreview.net/forum?id=maA1s1S0db

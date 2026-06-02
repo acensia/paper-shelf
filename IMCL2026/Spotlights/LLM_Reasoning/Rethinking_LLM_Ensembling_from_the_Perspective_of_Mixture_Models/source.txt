@@ -1,0 +1,4 @@
+Rethinking LLM Ensembling from the Perspective of Mixture Models
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.00419
+OpenReview: https://openreview.net/forum?id=YVk8EDxBWx

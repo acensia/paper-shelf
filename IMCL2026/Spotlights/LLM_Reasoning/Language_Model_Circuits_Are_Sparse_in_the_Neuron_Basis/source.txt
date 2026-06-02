@@ -1,0 +1,4 @@
+Language Model Circuits Are Sparse in the Neuron Basis
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.22594
+OpenReview: https://openreview.net/forum?id=OrviwFWcN4

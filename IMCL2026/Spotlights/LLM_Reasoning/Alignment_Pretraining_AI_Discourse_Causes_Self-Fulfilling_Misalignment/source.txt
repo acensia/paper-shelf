@@ -1,0 +1,4 @@
+Alignment Pretraining: AI Discourse Causes Self-Fulfilling (Mis)alignment
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.10160
+OpenReview: https://openreview.net/forum?id=951OAanYyQ

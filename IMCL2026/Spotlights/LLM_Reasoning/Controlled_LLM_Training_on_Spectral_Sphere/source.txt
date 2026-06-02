@@ -1,0 +1,4 @@
+Controlled LLM Training on Spectral Sphere
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.08393
+OpenReview: https://openreview.net/forum?id=5kTn1c3vtt

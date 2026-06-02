@@ -1,0 +1,4 @@
+MiniAppBench: Evaluating the Shift from Text to Interactive HTML Responses in LLM-Powered Assistants
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.09652
+OpenReview: https://openreview.net/forum?id=pwbLmew1aq

@@ -1,0 +1,5 @@
+MemoryBench: A Benchmark for Memory and Continual Learning in LLM Systems
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.00).
+OpenReview: https://openreview.net/forum?id=If4X4W2HWx
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

@@ -1,0 +1,4 @@
+PLANTAIN: Plan-Answer Interleaved Reasoning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2512.03176
+OpenReview: https://openreview.net/forum?id=lK2o9OjoXf

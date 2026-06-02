@@ -1,0 +1,5 @@
+Joint-Space Empowerment as a Theory of Dexterous Motor Coordination
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.05).
+OpenReview: https://openreview.net/forum?id=qI2eHwfNfh
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

@@ -1,0 +1,4 @@
+Towards Efficient LLMs Annealing with Principled Sample Selection
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.31175
+OpenReview: https://openreview.net/forum?id=2UH01A9Za0

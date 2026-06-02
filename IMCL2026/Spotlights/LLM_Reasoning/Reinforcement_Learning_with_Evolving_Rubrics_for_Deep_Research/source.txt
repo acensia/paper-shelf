@@ -1,0 +1,4 @@
+Reinforcement Learning with Evolving Rubrics for Deep Research
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2511.19399
+OpenReview: https://openreview.net/forum?id=97NEP1pyS3

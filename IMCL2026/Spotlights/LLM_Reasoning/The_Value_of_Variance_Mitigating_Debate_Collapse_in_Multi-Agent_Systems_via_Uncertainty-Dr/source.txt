@@ -1,0 +1,4 @@
+The Value of Variance: Mitigating Debate Collapse in Multi-Agent Systems via Uncertainty-Driven Policy Optimization
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.07186
+OpenReview: https://openreview.net/forum?id=Bc6c2OVWRh

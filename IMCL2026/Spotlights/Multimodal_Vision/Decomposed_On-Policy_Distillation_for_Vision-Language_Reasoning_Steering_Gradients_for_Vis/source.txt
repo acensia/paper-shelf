@@ -1,0 +1,4 @@
+Decomposed On-Policy Distillation for Vision-Language Reasoning: Steering Gradients for Visual Grounding
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2606.00564
+OpenReview: https://openreview.net/forum?id=Jb1YBPqyb7

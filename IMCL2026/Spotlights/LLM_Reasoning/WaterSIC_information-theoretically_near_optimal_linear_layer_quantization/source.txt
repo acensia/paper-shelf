@@ -1,0 +1,4 @@
+WaterSIC: information-theoretically (near) optimal linear layer quantization
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.04956
+OpenReview: https://openreview.net/forum?id=fCPgAHIciE

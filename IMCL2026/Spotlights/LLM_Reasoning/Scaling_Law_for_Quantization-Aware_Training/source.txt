@@ -1,0 +1,4 @@
+Scaling Law for Quantization-Aware Training
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2505.14302
+OpenReview: https://openreview.net/forum?id=fXr3uPr1G5

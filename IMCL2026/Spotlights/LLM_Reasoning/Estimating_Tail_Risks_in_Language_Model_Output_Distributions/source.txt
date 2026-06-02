@@ -1,0 +1,4 @@
+Estimating Tail Risks in Language Model Output Distributions
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2604.22167
+OpenReview: https://openreview.net/forum?id=Joka19sTny

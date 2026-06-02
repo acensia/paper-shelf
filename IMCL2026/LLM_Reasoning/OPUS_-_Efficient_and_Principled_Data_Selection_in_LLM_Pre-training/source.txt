@@ -1,0 +1,4 @@
+OPUS - Efficient and Principled Data Selection in LLM Pre-training
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2602.05400
+PDF: https://arxiv.org/pdf/2602.05400

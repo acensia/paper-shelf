@@ -1,0 +1,4 @@
+Bad Seeing or Bad Thinking? Rewarding Perception for Multimodal Reasoning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.14054
+OpenReview: https://openreview.net/forum?id=duzdftKtUA

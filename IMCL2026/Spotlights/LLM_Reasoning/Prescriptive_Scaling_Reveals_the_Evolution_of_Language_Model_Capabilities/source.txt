@@ -1,0 +1,4 @@
+Prescriptive Scaling Reveals the Evolution of Language Model Capabilities
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.15327
+OpenReview: https://openreview.net/forum?id=IkjsHRpuYY

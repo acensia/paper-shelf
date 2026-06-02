@@ -1,0 +1,4 @@
+XR-1: Towards Versatile Vision-Language-Action Models via Learning Unified Vision-Motion Representations
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2511.02776
+OpenReview: https://openreview.net/forum?id=JO0IsGJg16

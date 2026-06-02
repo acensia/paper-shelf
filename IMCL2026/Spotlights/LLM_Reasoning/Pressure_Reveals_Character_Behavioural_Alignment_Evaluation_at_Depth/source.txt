@@ -1,0 +1,4 @@
+Pressure Reveals Character: Behavioural Alignment Evaluation at Depth
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.20813
+OpenReview: https://openreview.net/forum?id=3U1l24EDvL

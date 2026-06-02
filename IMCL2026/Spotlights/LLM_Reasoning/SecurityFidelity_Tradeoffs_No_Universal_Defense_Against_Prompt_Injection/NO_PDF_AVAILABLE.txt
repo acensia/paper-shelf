@@ -1,0 +1,5 @@
+Security–Fidelity Tradeoffs: No Universal Defense Against Prompt Injection
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.31).
+OpenReview: https://openreview.net/forum?id=vTJmIhNvC3
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

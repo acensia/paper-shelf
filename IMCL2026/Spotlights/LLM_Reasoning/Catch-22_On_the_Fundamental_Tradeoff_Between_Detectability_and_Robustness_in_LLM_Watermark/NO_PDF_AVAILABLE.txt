@@ -1,0 +1,5 @@
+Catch-22: On the Fundamental Tradeoff Between Detectability and Robustness in LLM Watermarking
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.00).
+OpenReview: https://openreview.net/forum?id=097IlaUfQY
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

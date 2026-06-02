@@ -1,0 +1,5 @@
+HypoSpace: A Diagnostic Benchmark for Set-Valued Hypothesis Generation under Underdetermination and Sublinear Coverage Bounds
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.00).
+OpenReview: https://openreview.net/forum?id=QpjtK65JHO
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

@@ -1,0 +1,4 @@
+The Power of Power Law: Asymmetry Enables Compositional Reasoning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2604.22951
+OpenReview: https://openreview.net/forum?id=K83orsg2X9

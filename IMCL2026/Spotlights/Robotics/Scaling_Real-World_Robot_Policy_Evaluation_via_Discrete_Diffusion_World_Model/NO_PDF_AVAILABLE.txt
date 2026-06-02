@@ -1,0 +1,5 @@
+Scaling Real-World Robot Policy Evaluation via Discrete Diffusion World Model
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.50).
+OpenReview: https://openreview.net/forum?id=93uNlQ1Qp0
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

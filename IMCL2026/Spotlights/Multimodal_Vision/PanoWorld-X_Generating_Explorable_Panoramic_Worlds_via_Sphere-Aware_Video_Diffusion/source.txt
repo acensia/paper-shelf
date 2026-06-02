@@ -1,0 +1,4 @@
+PanoWorld-X: Generating Explorable Panoramic Worlds via Sphere-Aware Video Diffusion
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2509.24997
+OpenReview: https://openreview.net/forum?id=xEgoeNrp8B

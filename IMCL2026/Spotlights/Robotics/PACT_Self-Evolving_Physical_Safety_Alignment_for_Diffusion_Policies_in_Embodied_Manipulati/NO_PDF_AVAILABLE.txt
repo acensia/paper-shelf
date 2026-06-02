@@ -1,0 +1,5 @@
+PACT: Self-Evolving Physical Safety Alignment for Diffusion Policies in Embodied Manipulation
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.14).
+OpenReview: https://openreview.net/forum?id=ePFvXPdvhM
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

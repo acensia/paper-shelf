@@ -1,0 +1,5 @@
+SpatioLM: Towards General Physical Spatial Intelligence in Vision-Language Models
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.20).
+OpenReview: https://openreview.net/forum?id=CHavqrN1X9
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

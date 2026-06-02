@@ -1,0 +1,5 @@
+SCALE: Self-uncertainty Conditioned Adaptive Looking and Execution for Vision-Language-Action Models
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.00).
+OpenReview: https://openreview.net/forum?id=7MlfE2Da2W
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

@@ -1,0 +1,4 @@
+HALO - Human-Robot Collaboration via Heterogeneous-Agent Lyapunov Policy Optimization
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2603.03741
+PDF: https://arxiv.org/pdf/2603.03741

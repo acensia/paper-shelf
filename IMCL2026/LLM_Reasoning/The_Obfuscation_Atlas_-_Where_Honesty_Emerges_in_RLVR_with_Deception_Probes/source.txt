@@ -1,0 +1,4 @@
+The Obfuscation Atlas - Where Honesty Emerges in RLVR with Deception Probes
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2602.15515
+PDF: https://arxiv.org/pdf/2602.15515

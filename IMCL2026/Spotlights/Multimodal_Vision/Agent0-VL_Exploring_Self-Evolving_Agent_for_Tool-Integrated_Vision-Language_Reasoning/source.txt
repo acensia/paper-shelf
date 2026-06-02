@@ -1,0 +1,4 @@
+Agent0-VL: Exploring Self-Evolving Agent for Tool-Integrated Vision-Language Reasoning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2511.19900
+OpenReview: https://openreview.net/forum?id=aA02f0y0LY

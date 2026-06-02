@@ -1,0 +1,4 @@
+End-to-End Autoregressive Image Generation with 1D Semantic Tokenizer
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.00503
+OpenReview: https://openreview.net/forum?id=fSnxuRhWoC

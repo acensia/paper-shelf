@@ -1,0 +1,4 @@
+MetaphorVU: Towards Metaphorical Video Understanding
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.25461
+OpenReview: https://openreview.net/forum?id=yKcBAJMPXZ

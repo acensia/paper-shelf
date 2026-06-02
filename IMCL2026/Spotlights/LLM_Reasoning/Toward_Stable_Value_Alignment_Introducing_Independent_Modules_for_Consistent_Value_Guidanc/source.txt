@@ -1,0 +1,4 @@
+Toward Stable Value Alignment: Introducing Independent Modules for Consistent Value Guidance
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.11712
+OpenReview: https://openreview.net/forum?id=R80JLmXXPJ

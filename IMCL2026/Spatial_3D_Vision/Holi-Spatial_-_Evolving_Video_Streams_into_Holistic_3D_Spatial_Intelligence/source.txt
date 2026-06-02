@@ -1,0 +1,5 @@
+Holi-Spatial: Evolving Video Streams into Holistic 3D Spatial Intelligence
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2603.07660
+ICML: https://icml.cc/virtual/2026/oral/71165
+OpenReview: https://openreview.net/forum?id=UGAP2F6FfV

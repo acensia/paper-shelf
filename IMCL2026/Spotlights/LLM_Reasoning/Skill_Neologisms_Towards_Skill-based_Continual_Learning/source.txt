@@ -1,0 +1,4 @@
+Skill Neologisms: Towards Skill-based Continual Learning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.04970
+OpenReview: https://openreview.net/forum?id=5VgZUEpK6W

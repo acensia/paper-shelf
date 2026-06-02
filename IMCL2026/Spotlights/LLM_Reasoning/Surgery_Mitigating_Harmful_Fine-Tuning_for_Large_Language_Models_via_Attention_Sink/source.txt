@@ -1,0 +1,4 @@
+Surgery: Mitigating Harmful  Fine-Tuning for Large Language Models via Attention Sink
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.05228
+OpenReview: https://openreview.net/forum?id=6ojsIliNF0

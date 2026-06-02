@@ -1,0 +1,5 @@
+Evaluating Robustness of Reasoning Models on Parameterized Logical Problems
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.20).
+OpenReview: https://openreview.net/forum?id=gnLZWOubWa
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

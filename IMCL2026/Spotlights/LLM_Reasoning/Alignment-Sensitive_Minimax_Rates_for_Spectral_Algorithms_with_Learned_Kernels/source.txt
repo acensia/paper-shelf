@@ -1,0 +1,4 @@
+Alignment-Sensitive Minimax Rates for Spectral Algorithms with Learned Kernels
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2509.20294
+OpenReview: https://openreview.net/forum?id=4HrWo5x7YF

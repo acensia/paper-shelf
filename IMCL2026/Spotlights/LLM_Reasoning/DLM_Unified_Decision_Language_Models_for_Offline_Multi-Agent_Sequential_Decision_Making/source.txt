@@ -1,0 +1,4 @@
+DLM: Unified Decision Language Models for Offline Multi-Agent Sequential Decision Making
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2604.23557
+OpenReview: https://openreview.net/forum?id=qxG09uid4p

@@ -1,0 +1,5 @@
+Video-Based Optimal Transport for Feedback-Efficient Offline Preference-Based Reinforcement Learning
+ICML 2026 Oral.
+No public arXiv PDF matched as of 2026-06-02 (best score 0.36).
+ICML: https://icml.cc/virtual/2026/oral/71090
+OpenReview: https://openreview.net/forum?id=G8LVO5easu

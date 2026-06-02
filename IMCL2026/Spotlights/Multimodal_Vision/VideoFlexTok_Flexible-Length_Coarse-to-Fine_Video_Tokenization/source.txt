@@ -1,0 +1,4 @@
+VideoFlexTok: Flexible-Length Coarse-to-Fine Video Tokenization
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2604.12887
+OpenReview: https://openreview.net/forum?id=KyVlaw4BxE

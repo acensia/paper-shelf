@@ -1,0 +1,6 @@
+# PDFs are large arXiv downloads (~700MB) — not tracked for now.
+# Re-downloadable from arXiv; may migrate to Git LFS later.
+*.pdf
+
+# macOS
+.DS_Store

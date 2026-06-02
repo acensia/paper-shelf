@@ -1,0 +1,4 @@
+Beyond Global Alignment: Fine-Grained Motion-Language Retrieval via Pyramidal Shapley-Taylor Learning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.21904
+OpenReview: https://openreview.net/forum?id=RuTNWE1wr7

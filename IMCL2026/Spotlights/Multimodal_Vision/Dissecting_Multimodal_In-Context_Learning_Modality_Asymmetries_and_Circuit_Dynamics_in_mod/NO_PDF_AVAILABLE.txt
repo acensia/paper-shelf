@@ -1,0 +1,5 @@
+Dissecting Multimodal In-Context Learning: Modality Asymmetries and Circuit Dynamics in modern Transformers
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.00).
+OpenReview: https://openreview.net/forum?id=fhPu6dCiwt
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

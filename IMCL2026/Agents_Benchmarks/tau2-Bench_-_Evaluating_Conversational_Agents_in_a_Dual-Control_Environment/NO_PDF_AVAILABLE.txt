@@ -1,0 +1,5 @@
+$\tau^2$-Bench: Evaluating Conversational Agents in a Dual-Control Environment
+ICML 2026 Oral.
+No public arXiv PDF matched as of 2026-06-02 (best score 0.00).
+ICML: https://icml.cc/virtual/2026/oral/71171
+OpenReview: https://openreview.net/forum?id=OC2z7iSQKa

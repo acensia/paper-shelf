@@ -1,0 +1,4 @@
+T$^2$PO: Uncertainty-Guided Exploration Control for Stable Multi-Turn Agentic Reinforcement Learning
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.02178
+OpenReview: https://openreview.net/forum?id=aD1zjvdJN4

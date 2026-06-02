@@ -1,0 +1,4 @@
+Jailbreak to Protect: Buffering Harmful Fine-Tuning via Temporary Jailbreaking LoRA in Large Language Models
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.24550
+OpenReview: https://openreview.net/forum?id=O0JXgBBo3k

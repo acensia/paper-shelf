@@ -1,0 +1,4 @@
+Mechanistic Data Attribution: Tracing the Training Origins of Interpretable LLM Units
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.21996
+OpenReview: https://openreview.net/forum?id=PQaxfoEcRc

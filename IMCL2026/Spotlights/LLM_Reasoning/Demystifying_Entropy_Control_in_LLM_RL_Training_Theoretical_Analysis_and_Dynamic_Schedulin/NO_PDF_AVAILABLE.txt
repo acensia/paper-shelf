@@ -1,0 +1,5 @@
+Demystifying Entropy Control in LLM RL Training: Theoretical Analysis and Dynamic Scheduling
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.00).
+OpenReview: https://openreview.net/forum?id=hq2MPYXAko
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

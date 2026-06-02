@@ -1,0 +1,4 @@
+LIMSSR: LLM-Driven Sequence-to-Score Reasoning under Training-Time Incomplete Multimodal Observations
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.00434
+OpenReview: https://openreview.net/forum?id=0RLF7Sj2Fg

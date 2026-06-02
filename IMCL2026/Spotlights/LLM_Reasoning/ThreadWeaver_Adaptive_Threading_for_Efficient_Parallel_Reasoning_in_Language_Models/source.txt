@@ -1,0 +1,4 @@
+ThreadWeaver: Adaptive Threading for Efficient Parallel Reasoning in Language Models
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2512.07843
+OpenReview: https://openreview.net/forum?id=Efq2VvYk1o

@@ -1,0 +1,4 @@
+EcoVLA: Environment-Aware Adaptive Pruning with Interleaved Inference Orchestration for Vision-Language-Action Models
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2602.00780
+OpenReview: https://openreview.net/forum?id=7kH5uphAes

@@ -1,0 +1,4 @@
+Efficient numeracy in language models through single-token number embeddings
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2510.06824
+OpenReview: https://openreview.net/forum?id=Bh4Ubk80M8

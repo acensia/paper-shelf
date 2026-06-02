@@ -1,0 +1,4 @@
+What You Think is What You See: Driving Exploration in VLM Agents via Visual-Linguistic Curiosity
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.03782
+OpenReview: https://openreview.net/forum?id=zWStW3hrfW

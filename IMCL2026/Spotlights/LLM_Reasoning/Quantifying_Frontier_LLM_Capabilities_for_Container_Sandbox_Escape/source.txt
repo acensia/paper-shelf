@@ -1,0 +1,4 @@
+Quantifying Frontier LLM Capabilities for Container Sandbox Escape
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.02277
+OpenReview: https://openreview.net/forum?id=19AbP986bv

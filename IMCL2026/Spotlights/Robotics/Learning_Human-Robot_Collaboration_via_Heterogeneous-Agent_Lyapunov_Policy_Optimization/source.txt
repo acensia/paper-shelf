@@ -1,0 +1,4 @@
+Learning Human-Robot Collaboration via Heterogeneous-Agent Lyapunov Policy Optimization
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.03741
+OpenReview: https://openreview.net/forum?id=uBvlUE2wrP

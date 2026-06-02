@@ -1,0 +1,4 @@
+Do We Need Adam - Surprisingly Strong and Sparse RL with SGD in LLMs
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2602.07729
+PDF: https://arxiv.org/pdf/2602.07729

@@ -1,0 +1,4 @@
+VenusBench-Mobile - User-Centric Benchmark for Mobile GUI Agents
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2604.06182
+PDF: https://arxiv.org/pdf/2604.06182

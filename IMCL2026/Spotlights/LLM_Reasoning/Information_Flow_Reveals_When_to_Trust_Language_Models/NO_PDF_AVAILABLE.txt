@@ -1,0 +1,5 @@
+Information Flow Reveals When to Trust Language Models
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.25).
+OpenReview: https://openreview.net/forum?id=vd8HzoFZ7v
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

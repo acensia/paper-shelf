@@ -1,0 +1,4 @@
+Beyond Log Likelihood: Probability-Based Objectives for Supervised Fine-Tuning across the Model Capability Continuum
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2510.00526
+OpenReview: https://openreview.net/forum?id=2hQBG2ZlFb

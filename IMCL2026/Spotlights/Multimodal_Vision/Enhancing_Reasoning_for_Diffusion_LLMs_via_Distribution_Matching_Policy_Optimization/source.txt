@@ -1,0 +1,4 @@
+Enhancing Reasoning for Diffusion LLMs via Distribution Matching Policy Optimization
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2510.08233
+OpenReview: https://openreview.net/forum?id=09CSjVeDug

@@ -1,0 +1,4 @@
+Efficient Parallel Samplers for Recurrent-Depth Models
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2510.14961
+OpenReview: https://openreview.net/forum?id=h7WBYYJF1Q

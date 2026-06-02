@@ -1,0 +1,4 @@
+Alignment-Guided Score Matching for Text-to-Image Alignment in Diffusion Models
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.30038
+OpenReview: https://openreview.net/forum?id=vKWxArobP3

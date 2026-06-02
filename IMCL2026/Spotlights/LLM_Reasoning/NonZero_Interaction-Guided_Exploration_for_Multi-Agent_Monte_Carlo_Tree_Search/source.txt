@@ -1,0 +1,4 @@
+NonZero: Interaction-Guided Exploration for Multi-Agent Monte Carlo Tree Search
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2605.00751
+OpenReview: https://openreview.net/forum?id=Jh6gq9QsFa

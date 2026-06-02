@@ -1,0 +1,4 @@
+Are VLMs Seeing or Just Saying - Illusion of Visual Re-examination
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2605.15864
+PDF: https://arxiv.org/pdf/2605.15864

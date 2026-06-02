@@ -1,0 +1,4 @@
+MASPOB: Bandit-Based Prompt Optimization for Multi-Agent Systems with Graph Neural Networks
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.02630
+OpenReview: https://openreview.net/forum?id=A5venxSvpw

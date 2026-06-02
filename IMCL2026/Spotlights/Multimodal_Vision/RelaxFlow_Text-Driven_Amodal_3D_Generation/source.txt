@@ -1,0 +1,4 @@
+RelaxFlow: Text-Driven Amodal 3D Generation
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.05425
+OpenReview: https://openreview.net/forum?id=UamxHbDR3p

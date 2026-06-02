@@ -1,0 +1,4 @@
+VectorWorld: Efficient Streaming World Model via Diffusion Flow on Vector Graphs
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.17652
+OpenReview: https://openreview.net/forum?id=yTEEiE3YtD

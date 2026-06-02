@@ -1,0 +1,4 @@
+Just-In-Time Reinforcement Learning: Continual Learning in LLM Agents Without Gradient Updates
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2601.18510
+OpenReview: https://openreview.net/forum?id=pLvye0zHUC

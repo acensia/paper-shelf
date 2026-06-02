@@ -1,0 +1,4 @@
+POET-X: Memory-efficient LLM Training by Scaling Orthogonal Transformation
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2603.05500
+OpenReview: https://openreview.net/forum?id=et8jpWLUuD

@@ -1,0 +1,4 @@
+Long-Context Modeling with Dynamic Hierarchical Sparse Attention for Memory-Constrained LLM Inference
+ICML 2026 Spotlight
+arXiv: https://arxiv.org/abs/2510.24606
+OpenReview: https://openreview.net/forum?id=o3gN27ITWV

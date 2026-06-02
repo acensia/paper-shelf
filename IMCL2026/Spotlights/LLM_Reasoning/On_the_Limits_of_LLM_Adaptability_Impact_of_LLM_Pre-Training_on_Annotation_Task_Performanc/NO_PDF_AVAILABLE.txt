@@ -1,0 +1,5 @@
+On the Limits of LLM Adaptability: Impact of LLM Pre-Training on Annotation Task Performance
+ICML 2026 Spotlight.
+No public arXiv PDF matched as of 2026-06-02 (best title match score 0.15).
+OpenReview: https://openreview.net/forum?id=oTv2bKG5Qg
+Official PDF will appear in PMLR proceedings after the conference (July 2026).

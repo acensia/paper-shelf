@@ -1,0 +1,4 @@
+Motion Attribution for Video Generation
+ICML 2026 Oral
+arXiv: https://arxiv.org/abs/2601.08828
+PDF: https://arxiv.org/pdf/2601.08828
