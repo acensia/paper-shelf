@@ -1,0 +1,2059 @@
+===== PAGE 1 =====
+Unsupervised Partner Design Enables Robust Ad-hoc Teamwork
+Constantin Ruhdorfer 1 Matteo Bortoletto 1 Victor Oei 1 Anna Penzkofer 1 Andreas Bulling 1
+Abstract
+We introduceUnsupervised Partner Design
+(UPD), a population-free multi-agent reinforce-
+ment learning method for robust ad-hoc team-
+work. UPD generates training partners on-the-fly
+and selects them adaptively based on a learnabil-
+ity criterion, removing the need for pre-trained
+partner populations or manual parameter tuning.
+We show that this simple mechanism enables ef-
+fective partner diversity and can be extended to
+joint partner-environment selection when a proce-
+dural level generator is available. Across Level-
+Based Foraging, Overcooked-AI, and the Over-
+cooked Generalisation Challenge, UPD consis-
+tently achieves strong performance compared to
+both population-based and population-free base-
+lines. In a human-AI user study, agents trained
+with UPD achieve higher returns and are rated as
+more adaptive, more human-like, and less frustrat-
+ing than all evaluated baseline methods.
+1. Introduction
+Robust cooperation with unknown partners, commonly
+referred to as ad-hoc teamwork (AHT) (Stone et al., 2010),
+is a core requirement for cooperative artificial intelligence
+(AI). In AHT settings, agents must coordinate without
+assumptions about their partners’ policies, making learned
+coordination strategies prone to brittleness when deploy-
+ment partners differ from those encountered during training.
+Thus, training agents for AHT is costly as existing methods
+typically rely on large populations of diverse partner
+policies (Strouse et al., 2021; Zhao et al., 2023; Yu et al.,
+2023; Li et al., 2023b; Wang et al., 2025) or incorporate
+expert knowledge and hand-crafted models (Albrecht & Ra-
+mamoorthy, 2013; Barrett et al., 2014; Albrecht et al., 2016;
+Barrett et al., 2017). Maintaining and tuning such partner
+1Collaborative Artificial Intelligence, University of Stuttgart,
+Stuttgart, Germany. Correspondence to: Constantin Ruhdorfer
+<constantin.ruhdorfer@vis.uni-stuttgart.de>.
+Proceedings of the 43 rd International Conference on Machine
+Learning, Seoul, South Korea. PMLR 306, 2026. Copyright 2026
+by the author(s).
+Partner 
+Generator
+ Learner
+Learnability?
+Ego
+Agent
+sends
+candidates
+admits based on
+learnability
+trains
+updatesseeds
+Figure 1. Unsupervised partner designis a novel population-free,
+multi-agent learning framework for ad-hoc teamwork that uses
+learnability to find training partners for the ego agent to generate
+an open-ended curriculum.
+populations becomes increasingly expensive as tasks and
+partner diversity scale. Efficient end-to-end training (E3T)
+(Yan et al., 2023) partially addresses this challenge by gener-
+ating training partners as stochastic mixtures of an ego and
+random policy, avoiding explicit partner populations. How-
+ever, E3T still requires careful tuning of mixture parameters
+to each task and evaluation setting, limiting its scalability.
+In parallel, unsupervised environment design (UED)
+(Dennis et al., 2020) has shown that adaptive curricula over
+environment parameters can significantly improve generali-
+sation. Recent work has highlighted that generalising jointly
+across partners and environments is crucial for robust
+cooperation, while also showing that existing methods
+struggle to scale to this setting (Ruhdorfer et al., 2025b).
+Our work is guided by two high-level questions.First, can
+collaboration partners be generated cheaply and adaptively
+– analogous to environment design – and used to train
+robust ad-hoc teamwork agents without maintaining explicit
+partner populations?Second, does such a partner-design
+mechanism extend naturally to joint partner-environment
+curricula in procedurally generated settings, where
+population-based AHT methods are difficult to scale?
+As an answer to both, we introduceUnsupervised Partner
+Design (UPD), a population-free AHT method that builds
+an adaptive training distribution over partner behaviours
+through online generation and selection. UPD removes the
+need for pre-trained partner populations and hand-tuned
+mixture coefficients, while retaining strong performance in
+1
+arXiv:2508.06336v2  [cs.LG]  7 Jun 2026
+===== PAGE 2 =====
+Unsupervised Partner Design
+zero-shot coordination. When a procedural level generator
+is available, the same mechanism extends directly to joint
+partner-environment selection, yielding a simple joint
+curriculum learning approach. Our core contribution is to
+show that a simple generation and selection mechanism
+can result in non-trivial emergent coordination behaviour.
+Specifically:
+1. We show that UED ideas can be extended to the partner
+space and introduceUnsupervised Partner Design, a
+population-free method for training ad-hoc teamwork
+agents via adaptive partner generation and selection,
+eliminating the need for explicit partner populations.
+2. We demonstrate thatUPD achieves strong AHT per-
+formancein Level-Based Foraging (Albrecht & Ra-
+mamoorthy, 2013) and Overcooked-AI (Carroll et al.,
+2019), when compared to both population-based and
+population-free baselines when evaluated with diverse
+artificial partners and humans in section 5.
+3. We show thatthe same mechanism extends to joint
+partner-environment curriculain procedurally gen-
+erated settings, achieving robust zero-shot cooperation
+on the Overcooked Generalisation Challenge (OGC)
+(Ruhdorfer et al., 2025b) in section 6.
+2. Related Work
+2.1. Ad-hoc Teamwork
+AHT was explored in a wide range of multi-agent reinforce-
+ment learning (RL) environments (Carroll et al., 2019; Bard
+et al., 2020; Kurach et al., 2020; Ruhdorfer et al., 2025a).
+Popular AHT methods, such as fictitious co-play (FCP)
+(Strouse et al., 2021) or maximum entropy population-based
+training (MEP) (Zhao et al., 2023), rely on pretraining
+diverse partner populations and optimising best-response
+policies for these (Yu et al., 2023; Lou et al., 2023; Rahman
+et al., 2023; Erlebach & Cook, 2024; You et al., 2025). Re-
+cent works incorporated open-ended learning objectives to
+dynamically expand partner diversity (Li et al., 2023b; Wang
+et al., 2025), but still involved growing partner populations
+over time or used curricula over pretrained populations (Er-
+lebach & Cook, 2024) or over a partner model learned from
+offline data (Chaudhary et al., 2025). A notable exception is
+E3T (Yan et al., 2023), which generates partners on the fly as
+mixtures of the ego and a random policy. E3T demonstrated
+strong performance, outperforming prior population-based
+approaches such as FCP and MEP in human-AI coordi-
+nation settings. While this approach does not require any
+partner population and thus significantly reduces the compu-
+tational overhead, it still requires careful tuning of mixture
+coefficients between the ego and random policy for each
+task and evaluation scenario, limiting robustness across set-
+tings. In contrast, we propose a lightweight population-free
+approach that adaptively generates diverse partner behaviour
+without fixed parameters or pre-trained populations, and is
+compatible with existing curriculum learning frameworks.
+2.2. Unsupervised Environment Design
+UED (Dennis et al., 2020) adaptively generates training
+environments tailored to an agent’s capabilities and has
+proven effective for improving generalisation. Unlike
+domain randomisation (DR) (Tobin et al., 2017), UED
+generates environments to target an agent’s learning frontier.
+Existing UED methods mainly focus on single-agent
+settings and rely on regret-based objectives to guide
+environment generation (Wang et al., 2019; 2020; Dennis
+et al., 2020; Jiang et al., 2021b;a; Parker-Holder et al.,
+2022; Li et al., 2023a; Beukman et al., 2024). Extensions
+to multi-agent settings are limited: Samvelyan et al. (2023)
+focused on competitive settings, Ruhdorfer et al. (2025b)
+proposed a cooperative multi-agent UED benchmark,
+but no method, while You et al. (2025) trains only with
+past self-play checkpoints. Recent works reframed UED
+as a learnability-driven problem, replacing regret-based
+objectives with scoring functions that directly measure an
+environment’s learning potential (Rutherford et al., 2024;
+Monette et al., 2025). However, prior work has focused on
+environment parametrisation only and does not consider
+partner policies as part of the curriculum space. We
+extend unsupervised design to partner policies, introducing
+adaptive partner generation as a population-free curriculum
+mechanism. When combined with existing UED ap-
+proaches, this enables joint partner-environment selection in
+procedurally generated settings for zero-shot cooperation.
+3. Preliminaries
+3.1. Reinforcement Learning
+Inspired by prior work on multi-agent unsupervised envi-
+ronment design (Samvelyan et al., 2023; Ruhdorfer et al.,
+2025b), we model our setting as anunder-specified coopera-
+tive two-agent stochastic game. Each environment instance
+is defined by a Markov game Gθ =⟨S, A, T θ, Rθ, γ, ρ0⟩,
+indexed by environment parameters θ∈Θ . The under-
+specified setting corresponds to a family of levels {Gθ}θ∈Θ,
+where each θ defines a specific instance of the game (a
+level), for example specifying the locations of walls or
+objects. At each time step, both agents select actions
+a(1)
+t , a(2)
+t ∈A , the environment transitions according
+to st+1 ∼T θ(·|st, a(1)
+t , a(2)
+t ), and they receive a shared
+reward Rθ(st, a(1)
+t , a(2)
+t ). γ∈[0,1] is the discount factor.
+We denote τ as a trajectory (s0, a0, ..., sT , aT ). As in
+previous works (Carroll et al., 2019; Yan et al., 2023), we
+solve the coordination problem using self-play by pairing
+the ego agent with a fixed partner policy πp and optimise
+J(π ego, πp) =E
+hP∞
+t=0 γtRθ(st, a(1)
+t , a(2)
+t )
+i
+.
+2
+===== PAGE 3 =====
+Unsupervised Partner Design
+In this work, we consider two-agent environments that
+are both fully specified (LBF, Overcooked-AI) and under-
+specified, e.g. that feature procedural level generation (the
+OGC). In the fully specified case, the formalism reduces
+to a standard two-agent stochastic game. Crucially, this
+perspective allows us to reason about training over joint
+distributions of tasks (viaθ) and partners (viaπ p).
+3.2. Ad-hoc Teamwork
+Within the under-specified stochastic game formalism
+above, AHT corresponds to the problem of optimising
+πego with respect to an unknown set of partner policies
+Πeval, including humans (Stone et al., 2010). The goal
+is to find π∗
+ego = argmax πego Eπp∼Πeval[J(π ego, πp)].
+Since Πeval is typically unknown, we cannot solve this
+problem directly. Many approaches instead use expert
+domain knowledge or learn a set of diverse partners
+Πtrain for training πego as a best response to Πtrain, via
+πego = argmaxπego Eπp∼Πtrain[J(π ego, πp)]. Since Πeval and
+Πtrain are typically different, πego might not be optimal for
+Πeval because of the distribution shift. However, if Πtrain
+sufficiently approximatesΠ eval,π ego can still perform well.
+This naturally sets up a two-stage process: training Πtrain
+and then training πego as a best response. Obtaining Πtrain
+often comes at considerable costs as querying experts and/or
+training partners for Πtrain is expensive. FCP for example
+trains N policies with different random initialisation using
+RL to construct Πtrain, while MEP additionally considers
+interactions between these N policies. If training a policy
+to completion has cost C, then population-based methods
+incur training costs on the order of O(N C) or worse due
+to inter-policy interactions (e.g. MEP).
+Opposed to these, E3T is a population-free approach
+and trains πego efficiently in self-play, without using a
+pre-constructed Πtrain, by computing πp as a mixture of πego
+and a random policyπ r:
+πp =ϵπ r + (1−ϵ)π ego.(1)
+Here, ϵ∈[0,1] is fixed for the training duration. Yan et al.
+(2023) select ϵ manually based on the task and evaluation
+setting, which introduces sensitivity to hyperparameter
+choices and limits adaptivity across different training stages.
+In this work, we consider both the standard AHT problem
+in which Πeval is unknown but the evaluation cooperation
+task is known ( θtrain =θ eval), and the more challenging
+AHT in unknown levels (Ruhdorfer et al., 2025b; Jha et al.,
+2025) in which πego is evaluated in a range of evaluation
+levels where each level θeval is associated with its own Πeval.
+0 20 40 60 80 100
+Training Epoch
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Competence
+Random Partners
+Mid-Skill Partners
+Near-Expert Partners
+E3T: Fixed ego fraction
+Simulated Partner Competence vs. Training Progress
+Ego Competence
+E3T Partner Competence ( =0.5)
+Possible UPD Partners (via  ~ U[0,1])
+Sampled UPD Partners via learnability
+Figure 2.Conceptual illustration:We illustrate that as ego com-
+petence improves over training (black), E3T generates partners
+using a fixed mixture coefficient (here ϵ= 0.5 ), resulting in a
+fixed fraction of ego competence (blue). In contrast, UPD samples
+ϵ∼ U(0,1) (green) and filters partners using a learnability crite-
+rion, leading to a dynamic range of partner competences (orange).
+3.3. Unsupervised Environment Design
+In single-agent RL, UED algorithms use the free parameters
+of an environment θ∈Θ to create a curriculum using
+a utility function U. Many algorithms use regret as the
+UED objective (Dennis et al., 2020; Samvelyan et al.,
+2023), where θ is selected based on the performance
+difference between the current and an optimal policy:
+U(π, θ) =REGRET θ(π, π∗
+θ). However, this assumes ac-
+cess to the optimal policy π∗
+θ. Recent work has thus moved
+away from regret as utility. Sampling for learnability (SFL)
+(Rutherford et al., 2024) scores levels using a learnability
+function that prioritises instances near the agent’s learning
+frontier. For binary outcomes in which R(τ, θ)∈ {0,1} ,
+learnability is defined as ℓsr(π, θ) =p(1−p) , where
+p=E τ∼p(τ|π,θ) [R(τ, θ)] is the success rate on a level.
+Monette et al. (2025) extended this idea to continuous
+rewards rewards by weighting return variance around the
+mean performance. In this work, we apply this idea topart-
+nersrather than levels, treating them as training instances
+that can be generated and selected based on learnability.
+4. Unsupervised Partner Design
+Unsupervised Partner Designis a population-free learning
+approach that adaptively generates and selects cooperation
+partners based on their learnability. The central idea is to ap-
+ply unsupervised environment design not over environment
+parameters, but over induced training environments defined
+by partner policies. Unlike prior work, UPD constructs
+an adaptive training distribution over partner behaviours
+through online generation and learnability-guided selection
+(Figure 2), runs in self-play and only requires a single
+training stage.
+3
+===== PAGE 4 =====
+Unsupervised Partner Design
+Algorithm 1Unsupervised Partner Design
+Require: Environment G, ego agent policy πego, partner
+generator Sp, # scoring rollouts N, rollout length L,
+refresh frequencyR, buffer size|B|, SFL ratioρ
+1:Initialize empty buffersB,B temp;t←0
+2:whilenot convergeddo
+3:iftmodR= 0then
+4:ResetB temp ← ∅ {Parallelised from here}
+5:foreach desired partnerdo
+6:Sample(π p, θ)∼ S p(πego)×Θ(Alg. 2)
+7: Get N rollouts of length L in Gθ for pairing
+(πego, πp)and collect returnsR 1, . . . , RN
+8:Compute:ℓ (πego,πp,θ) =ℓ(π ego, πp, θ)
+9:Store(ℓ (πego,πp,θ), πp, θ)into bufferB temp
+10:end for
+11:B ←top|B|entries fromB temp with highestℓ
+12:end if
+13:Sample a(π p, θ)batch fromBandS p usingℓandρ
+14:Updateπ ego inG πp,θ using PPO
+15:t←t+ 1
+16:end while
+4.1. Curriculum over Partners
+We start from the observation that partners inΠtrain might not
+be optimal for learning at a given point in time as, due to its
+associated cost, Πtrain is typically fixed to a small number of
+partners. What if we could instead generate the partners that
+are useful training instances forπ ego throughout training?
+For the moment, let us assume access to a diverse partner
+generator πp ∼ S p and a fixed level θ. Within the stochastic
+game formalism introduced above, fixing a partner policy
+πp induces a training environment for the ego agent by
+conditioning the co-player in the underlying game:
+Gπp,θ :=⟨S, A, T πp,θ, Rπp,θ, γ, ρθ⟩,(2)
+Tπp,θ(s′|s, a(1)) =
+X
+a(2)
+πp(a(2)|s)Tθ(s′|s, a(1), a(2)),(3)
+Rπp,θ(s, a(1)) =
+X
+a(2)
+πp(a(2)|s)Rθ(s, a(1), a(2)).(4)
+Sampling partner policies from Sp therefore defines a dis-
+tribution over induced training environments. From the
+curriculum learning perspective, the goal is to prioritise part-
+ners that are likely to induce learning progress in the ego
+agent. We operationalise this by treating each partnerπp as a
+training instance and scoring it using a learnability function
+ℓ(πego, πp) estimated from rollout returns. Concretely, we
+sample multiple partners using Sp and score them in Gπp,θ:
+ℓvar(πego, πp, θ) = Varτ∼G πp ,θ[R(τ)].(5)
+Low return variance indicates either consistent failure or
+success, whereas high variance corresponds to partners of
+Algorithm 2Partner Policy GeneratorS p
+Require:Ego policyπ ego, Bias prob.p bias = 0.5
+1:Sample mixing parameterϵ∼ U(0,1)
+2:With probabilityp bias:
+3: Sample persistent bias mask m∼Dirichlet(α·1 A)
+4:Otherwise:
+5:Setm=1 A/A
+6:Obtain biased random policyπ r,m with bias maskm
+7:Return partner policyπ p =ϵπ r,m + (1−ϵ)π ego
+intermediate difficulty where cooperation sometimes suc-
+ceeds. Intermediate difficulty samples are known to promote
+learning (Florensa et al., 2018; Tzannetos et al., 2023).
+Recent work provides a formal connection between
+learnability and expected policy improvement. In particular,
+Foster et al. (2026) show that for a broad class of advantage-
+based policy gradient methods (including PPO) the expected
+improvement of the policy is proportional to the variance
+of the scalar learning signal used to form the advantage. In
+our setting, fixing a partner policy πp and level θ induces
+a single-agent game Gπp,θ for the ego agent. Applying the
+result of Foster et al. to this induced game implies that
+the expected one-step improvement of πego when training
+in Gπp,θ increases with Varτ∼G πp ,θ[R(τ)]. Therefore,
+return variance provides a principled signal for prioritising
+partners that are expected to induce policy improvement
+in the ego agent. In this sense, UPD extends the curriculum
+mechanism of SFL from levels to partner policies.
+4.2. Curriculum over Partners and Levels
+Generalising to both novel partners and levels is critical for
+robust cooperation in under-specified environments (Ruh-
+dorfer et al., 2025b). Notably, UPD readily extends to joint
+curricula over both partners and levels in an underspecified
+game. In this case, ℓ is simply calculated by sampling a tuple
+(πp, θ)∼ S p ×Θ and obtaining τ∼p(τ|π ego, πp, θ). One
+problem in this formalism is that different levels θ might
+induce different reward ranges. To address this, we use a
+coefficient-of-variation squared (CV2) score to correctℓ:
+ℓCV 2(πego, πp, θ) = Varτ∼(π ego,πp,θ)[R(τ, θ)]
+ 
+Eτ∼(π ego,πp,θ)[R(τ, θ)] +δ
+2 ,(6)
+where δ is a small constant. We refer to this extension as
+Joint UPD (JUPD), and present a method sketch in Alg. 1.
+4.3. Online Partner Generation
+To instantiate the curriculum over partners, we require a
+partner policy generator Sp from which candidate partners
+can be sampled (see Alg. 2). In this work, we extend the
+E3T partner generation strategy by introducing stochasticity
+4
+===== PAGE 5 =====
+Unsupervised Partner Design
+along both competence and behavioural dimensions. How-
+ever, UPD can be used withanyform of partner generator.
+E3T relies on a fixed mixing coefficientϵ, which can be sub-
+optimal across different stages of training. Early in learning,
+more competent partners can improve task learning, whereas
+later, less predictable partners pose challenges. Rather than
+fixing ϵ, UPD samples ϵ∼ U(0,1) throughout training, gen-
+erating partners that span a broad range of competencies.
+Beyond competence variation, cooperative partners often
+exhibit systematic behavioural tendencies. For instance,
+human players in Overcooked display persistent action pref-
+erences, such as favouring particular movement directions
+or overusing the stay action (Carroll et al., 2019; Yu et al.,
+2023). To capture such low-level biases, UPD introduces
+a bias masking mechanism. When generating a partner,
+we sample a persistent bias mask m∼Dir(α·1 A), which
+defines a biased random policy over the discrete action
+space. The Dirichlet distribution provides a simple way to
+control the strength of such biases via a single parameter α.
+4.4. UPD and Convention Selection
+In coordination games, self-play converges to one of
+multiple equivalent equilibria which yields high self-play
+performance but poor partner generalisation (Carroll et al.,
+2019; Hu et al., 2020). Consider the2×2matrix game:
+up down
+up 1 0
+down 0 1
+.(7)
+Self-play selects only one equilibrium, e.g.π up
+SP , yielding
+Eτ∼(π up
+SP ,πup
+SP )[R(τ)] = 1,Var τ∼(π up
+SP ,πup
+SP )[R(τ)] = 0.(8)
+In contrast, suppose UPD’s partner generator Sp samples
+at least one partnerπ p with0< p(up)<1. Then
+Eτ∼(π up
+SP ,πp)[R(τ)]<1,Var τ∼(π up
+SP ,πp)[R(τ)]>0,(9)
+with ℓ(πup
+SP , πp)> ℓ(π up
+SP , πup
+SP ) which biases UPD toward
+training with partners that do not fully share this convention.
+Furthermore, in this game, for a policy πup
+SP and a partner
+πp with p=π p(up), ℓvar is maximized at p= 0.5 . Hence,
+if the partner generator Sp has support near p= 0.5 1, UPD
+will select a partner that is maximally ambiguous and thus
+can introduce gradient pressure away from the current equi-
+librium, discouraging overfitting to a convention while also
+maximising expected policy improvement (subsection 4.1).
+1For the partner generator used in this work (Alg. 2) and fixed
+πup
+SP , ℓ is maximized by ϵ= 1.0 and pbias =False , which yields
+a uniform random partner with p(up) = 0.5 . This setting would
+be discovered in expectation by sufficiently sampling from Sp.
+E3T, in contrast, would require ϵ being set optimally manually
+which is possible for this example but not generally. Moreover,
+since the optimal ϵ depends on the task θ (as in this example),
+E3T’s fixed strategy fails to provide optimal partners across levels.
+=0.2
+ =0.3
+ =0.4
+ =0.5
+ =0.6
+ =0.7
+ =0.8
+ UPD
+0.00
+0.05
+0.10
+0.15
+0.20
+0.25
+0.30
+0.35Avg episodic return (max 0.5)
+E3T
+UPD
+Figure 3.Average returns in cooperative LBF with ten evaluation
+partners. Bars show mean ± standard deviation. UPD achieves
+higher average returns than E3T across all testedϵ.
+5. Experiments in Fixed Environments
+We split our experiments into two sections.In this section,
+we evaluate UPD in environments without procedural
+generationwhere θ is fixed, using Level-Based Foraging
+and Overcooked-AI. Our goal here is to assess UPD’s
+effectiveness as an AHT method. In section 6, we turn
+toprocedurally generated environments using OGC,
+evaluating whether the same mechanism extends to joint
+generalisation across partners and levels within this setting.
+In total, our paper evaluates282trained policies.
+5.1. Comparing UPD and E3T in LBF
+We first analyse the behaviour of the current population-free
+baseline, E3T, by comparing it to UPD on LBF (Albrecht
+& Ramamoorthy, 2013) – a popular environment in AHT
+research (Rahman et al., 2021; Papoudakis et al., 2021;
+Mirsky et al., 2022; Rahman et al., 2023; Wang et al.,
+2025). We base our experiments on the version used in
+(Bonnet et al., 2024; Wang et al., 2025), where two agents
+need to work together to collect three foods in a 7×7 grid,
+each food requiring both agents to be loaded. The game
+terminates after 100 steps, when agents collide or when all
+food has been collected, yielding a maximum return of 0.5.
+Since E3T has not been used on LBF yet, ϵ is determined
+empirically by sweepingϵ∈ {0.2,0.3, . . . ,0.8}.
+To construct a diverse evaluation populationΠeval, similar to
+Wang et al. (2025), we combine hardcoded agents, planning
+models, and agents trained using BRDiv (Rahman et al.,
+2023). We use three BRDiv agents, one random, and six
+planning agents (collecting food in (reverse) column-major,
+(reverse) lexicographic, (reverse) nearest-to-farthest) for
+a total of ten evaluation partners. A BRDiv population
+optimises self-play while minimising cross-play returns and
+thus adopts competent but incompatible strategies. Note that
+not all of these partners act optimally; optimal cooperation
+with those might still result in below-maximum returns.
+5
+===== PAGE 6 =====
+Unsupervised Partner Design
+Table 1.Average returns (mean ± std.) with evaluation populations in Overcooked-AI. We average over both starting positions. The best
+results are inbold, second-best are underlined . UPD outperforms the considered baselines in aggregate.
+Method CRoom AA CR CC FC Average % Gain rel. to E3T
+SP68.9±5.6 64.4±2.3 25.3±4.5 14.5±10.2 33.9±8.3 41.4±4.7-62.2%
+FCP109.9±5.8 117.4±7.0 64.7±3.0 30.8±9.7 27.2±4.8 70.0±2.2-11.8%
+MEP109.5±5.3 142.8±36.1 64.0±2.2 13.7±5.3 46.2±6.1 75.3±7.6-4.5%
+E3T111.3±7.8 127.9±22.1 58.4±4.5 55.0±2.4 41.3±8.3 78.8±12.5-
+UPD w/o bias111.5±2.3159.9±20.7 66.2±3.8 57.1±2.8 44.4±5.5 87.9±3.6+10.9%
+UPD w/oℓ110.8±3.1 164.0±18.7 68.9±3.464.5±3.945.7±3.8 90.8±6.0+14.1%
+UPD (Ours)107.5±2.8181.4±6.4 69.2±5.6 64.5±1.3 48.7±2.8 94.4±2.3+18.0%
+0 1 2 3 4 5
+Environment Step 1e7
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Value
+Epsilon (Partner Randomness)
+Layout
+CRoom
+CC
+CR
+AA
+FC
+Figure 4.We compare how ℓvar selects different average ϵ values
+across layouts during training. For layouts that are known to
+feature narrower coordination challenges (CC, CR & FC), UPD
+favours smaller, while for CRoom and AA, UPD favours higher ϵ.
+We train 6 seeds for 107 timesteps, use learning rate 1e−3,
+use 512 environments (400 steps/env), UPD uses |B|= 64 ,
+R= 4 , N= 5 , pbias = 0.5 , and α= 1.0 . Figure 3
+shows that no tested ϵ achieves the highest cooperation per-
+formance, whereas UPD consistently yields higher returns
+with Πeval. This illustrates a practical limitation of E3T in
+this setting: fixing ϵ restricts the range of partner behaviours
+encountered during training (cf. Figure 2).UPD addresses
+this limitation, and its adaptive range of partner behaviours
+provides the strongest returns. In practice, sweeping ϵ may
+be infeasible in larger settings, while UPD avoids this tuning
+altogether with only marginal additional runtime ( <10%
+in our experiments; we characterise UPD’s efficiency in
+Appendix F).
+5.2. Overcooked-AI with Artificial Partners
+5.2.1. EXPERIMENTALSETUP
+To evaluate UPD under richer coordination dynamics,
+we next consider Overcooked-AI (Carroll et al., 2019)
+with the five standard layouts: Cramped Room (CRoom),
+Asymmetric Advantages (AA), Coordination Ring (CR),
+Counter Circuit (CC), and Forced Coordination (FC).
+We follow the same protocol for generating Πeval as for
+LBF. Concretely, Πeval contains: (1) 3-4 BRDiv agents,
+(2) probabilistic planning agents (Wang et al., 2025), (3)
+hardcoded agents performing task subsets (e.g., onion-only
+workers) (Yu et al., 2023), and (4) low-competence random
+and stay agents. CRoom uses nine such partners, AA, CR,
+and CC use eight, and FC uses four due to its restrictive
+dynamics that limit viable hardcoded strategies.
+We compared UPD against four baselines that, together,
+cover the most widely and successfully used AHT algo-
+rithms in Overcooked-AI: (1) a self-play baseline trained
+using IPPO (de Witt et al., 2020), (2) E3T using their re-
+ported hyperparameters: ϵ= 0.5 for CRoom, AA, CR, and
+CC, and ϵ= 0.0 for FC, (3) MEP agents using a population
+size of 48, and (4) FCP agents trained with a population
+of size 48. To ensure competitive baselines, we use larger
+population sizes for MEP than in the original works, which
+improves performance (Yu et al., 2023) and tune MEP
+populations per layout if required. In contrast, we found that
+UPD works with one set of hyperparameters on all layouts.
+We used the same recurrent policy network for all methods.
+For E3T and UPD, we added the partner model proposed by
+E3T. Training used 512 envs (400 steps/env),5×10 7 total
+time steps, with reward shaping for the first 3×10 7. For
+UPD, we used a partner buffer size of |B|= 512 , N= 10
+evaluation rollouts per partner, Dirichlet parameter α= 1.0 ,
+and refreshed the buffer every fourth training loop ( R=
+4). We train and report results from 6 seeds. All methods
+converge stably, see Figure 10 - Figure 14.
+5.2.2. RESULTS
+Table 1 shows that UPD achieves the highest average return
+when paired with diverse, unseen partners, outperforming
+the considered population-based and population-free base-
+lines in this evaluation. Other methods achieve lower aver-
+age returns but outperform UPD on CRoom. Our takeaway
+is not that UPD dominates every layout, but that a single
+population-free configuration remains competitive or bet-
+ter than strong population-based methods while avoiding
+explicit partner training.
+We also compared with two ablations in Table 1 (bottom):
+UPD w/o biasuses a uniformly random policy πr for partner
+mixing, whileUPD w/o ℓ removes learnability scoring and
+instead samples random partners per rollout. Each variant
+6
+===== PAGE 7 =====
+Unsupervised Partner Design
+(a)Learnability vs. return for CR.
+ (b)Learnability vs. return for AA.
+ (c)Learnability vs. return for FC.
+Figure 5.We plot learnability vs. return in three representative layouts: CR, AA, and FC. Each dot represents a single potential partner.
+The bar plots on the axis count partners in their respective return/learnability bands. UPD identifies partners of intermediate difficulty.
+still produces competitive AHT agents, but their combina-
+tion in full UPD yields the best results. Interestingly,UPD
+w/o ℓ performs quite well, likely because the online partner
+generator alone induces a natural curriculum by sampling
+a broad spectrum of partners. However, UPD outperforms
+UPD w/o ℓ on average and particularly in AA, where learn-
+ability has the strongest impact. A large share of the AHT
+improvement thus appears to come from large-scale partner
+generation and biasing, with learnability providing an ad-
+ditional gain. Together, we find that UPD outperforms all
+ablations on average, underscoring the benefits of dynamic,
+learnability-driven curricula.
+5.2.3. ANALYSIS OFPARTNERSELECTIONDYNAMICS
+We now analyse how UPD selects partners during learning.
+Figure 4 shows that UPD favours different average ϵ values
+across layouts and time steps. In the figure, we average over
+the ϵ values in the buffer. In layouts with narrower coop-
+eration conventions (CR, CC, FC), UPD gravitates towards
+lower ϵ; in more flexible layouts (CRoom, AA), it prefers
+more stochastic partners.This indicates that learnability
+favours different ranges of partner competence across
+layouts and timeand that no singleϵwould be optimal.
+Training dynamics under UPDTo further investigate
+the role learnability plays in the training dynamics, we plot
+learnability vs. return for all generated partners in Figure 5,
+similar to prior work (Rutherford et al., 2024; Monette et al.,
+2025). We use three representative layouts (CR, AA, and
+FC), and evaluate the trained ego agent after 40% of train-
+ing by rolling out with 8,192 randomly generated partners.
+We select these three layouts as they are representative:
+both CRoom and CC behave very similarly to the CR case.
+Across these, we observe three major phenomena: (1) learn-
+ability is zero both for partners with whom the ego agent
+performs well as well as comparatively poorly, (2) learnabil-
+ity is highest for partners with intermediate difficulty, and
+(3) learnability is high for very few of the generated partners:
+most partners receive a learnability score of zero or close to
+0 1 2 3 4 5
+Env Step 1e7
+0.10
+0.12
+0.14
+0.16
+0.18
+0.20
+0.22
+0.24Biasing Probability
+Right bias
+Left bias
+Switch
+Left vs Right Bias
+Layout
+AA
+CR
+CC
+Left Bias
+Right Bias
+0 1 2 3 4 5
+Env Step 1e7
+Down bias
+Reversed
+Switch
+Up vs Down Bias
+Layout
+CC
+CRoom
+Up Bias
+Down Bias
+Figure 6.Action biases added in partner generation over training.
+We find thatUPD induces emergent convention breaking, with
+partners initially biased toward one action before switching.
+zero. This is consistent with the motivation in Sec. 4.1: most
+partners are not equally beneficial, andUPD consistently
+identifies rare partners of intermediate difficulty.
+Emergent Convention BreakingFigure 6 shows system-
+atic shifts in average directional action biases among gener-
+ated partners during training: early on, partners often exhibit
+a consistent directional preference (e.g., favouring right),
+which later switches to the opposite bias. This behaviour is
+consistent across layouts and seeds. These bias switches are
+consistent with learnability favouring partners that violate
+the ego agent’s current coordination conventions, as such
+partners tend to induce higher return variability (see subsec-
+tion 4.4). Unlike prior zero-shot coordination approaches
+that rely on hand-engineered convention-breaking mech-
+anisms (Hu et al., 2020), UPD exhibits analogous dynamics
+without any explicit convention-breaking components.
+5.3. Human-AI Experiments in Overcooked-AI
+As a final experiment on Overcooked-AI, we evaluated how
+UPD performs with humans in a double-blind user study.
+We evaluated four representative agents – SP, MEP, E3T,
+and UPD – on three layouts with challenging coordination
+7
+===== PAGE 8 =====
+Unsupervised Partner Design
+Frust Adapt Human Coord Return
+1
+2
+3
+4
+5Survey Score (1 5)
+SP MEP E3T UPD
+0
+20
+40
+60
+80
+100
+120
+Return
+****
+********
+****** ***
+*** ****
+*
+Figure 7.Human evaluation of partners: Frust = ‘frustrating?’ (↓),
+Adapt = ‘adapted well?’ (↑), Human = ‘human-like?’ (↑), Coord
+= ‘coordinated well?’ ( ↑). We performed one-sided Wilcoxon
+signed-rank tests on individual survey questions and one-sided
+paired t-tests on return, comparing UPD to each baseline. Signifi-
+cance levels are Holm-Bonferroni-corrected to account for three
+comparisons (∗=p <0.05 , ∗∗=p <0.01 , ∗ ∗ ∗=p <0.001 ).
+dynamics: AA, CR, and CC. Twelve participants (ages
+22-31, five female) were recruited, each playing all
+agent-layout combinations in randomised order. We
+collected a total of 144 games, with 36 games played per
+method (200 steps per game, following (Jha et al., 2025)).
+A tutorial session preceded the trials, and compensation
+was provided per institutional ethics guidelines. The
+institutional ethics review board approved the study.
+Figure 7 shows thatUPD achieves higher average returns
+than the considered baselines in human-AI interactions
+(right), and is also preferred across most subjective survey
+items (left): participants foundUPD significantly more
+adaptive, more human-like, a better collaborator,
+and less frustrating to work with. To evaluate overall
+subjective preference, we aggregated individual responses
+across the survey items. The ratings showed high internal
+consistency (Cronbach’s α= 0.916 ), justifying the use
+of a composite score. UPD received higher aggregate
+preference scores than other methods and their differences
+were statistically significant (Wilcoxon signed-rank tests,
+Holm-Bonferroni-corrected, p <0.05 ). Given the sample
+size, these results demonstrate that UPD is effective at
+collaborating with humans, rather than establishing it as
+the best-performing method overall.
+6. Experiments with Procedural Generation
+A central motivation for UPD is its compatibility with UED,
+enabling joint curricula over both partners and levels. To
+test this, we evaluated UPD within the OGC (Ruhdorfer
+et al., 2025b) – a particularly difficult environment, where
+levels are randomly generated and not guaranteed to be
+Table 2.Results (mean ± std.) for joint unsupervised environment
+and partner generalisation on the 5×5 Overcooked Generalisation
+Challenge. Best results arebold, second-best are underlined .
+Method CRoom CR FC Avg.
+DR-DR86.4±7.2 53.6±8.3 9.7±2.4 49.9±3.2
+CEC41.4±9.2 20.3±7.0 12.7±3.5 23.9±9.7
+SFLE3T81.7±7.8 41.1±10.1 7.4±2.5 44.0±3.0
+JUPD97.0±7.4 60.0±6.1 17.1±4.2 58.9±4.4
+Early Middle Final
+Figure 8.Examples of levels sampled into the JUPD training buffer
+at different stages of training.
+solvable, placing a heavy burden on the UED mechanism.
+In OGC, Θ varies the locations of walls, objects, and agents.
+To ensure tractability, we used the 5×5 version of the OGC
+and trained all methods for 109 steps using 1,024 parallel
+environments. This is required for convergence in OGC due
+to the high variance induced by procedural level generation.
+Evaluation was performed using held-out level-partner
+combinations and held-out layouts with adjusted evaluation
+populations matched to the Overcooked-AI experiments.
+Classic AHT methods are not designed to scale to procedu-
+rally generated environments (Ruhdorfer et al., 2025b; Jha
+et al., 2025). Because of this, we compared JUPD against
+several baselines that combine level and partner generation:
+(1)DR-DRrandomly samples partners and levels, (2) a
+Cross-Environment-Cooperation (CEC)adaption that se-
+lects levels at random and plays in self-play. CEC performs
+well when the training level generator closely matches the
+evaluation layouts (Jha et al., 2025). (3)SFLE3Tcombines
+the best of the literature and selects levels using SFL and
+creates E3T partners withϵ= 0.5.
+As shown in Table 2, JUPD achieves the highest average
+return across all evaluated layouts. Compared to DR-DR
+and CEC, which do not adapt partner difficulty, and
+SFLE3T, which relies on static partner generation, JUPD
+jointly selects suitable partners and levels during training.
+Sampled levels over time are visualised in Figure 8.
+7. Discussion and Limitations
+The experiments in this paper were motivated by two
+questions: whether collaboration partners can be designed
+cheaply and adaptively, analogous to level design, and
+whether such a mechanism extends naturally to joint
+partner-environment curricula.
+Because our goal is to design an AHT method for the joint
+8
+===== PAGE 9 =====
+Unsupervised Partner Design
+curriculum setting, we focus on a partner generator that
+cleanly extends to procedurally generated environments via
+learnability and by relying only on the ego policy. In this
+setting, pre-trained partner populations may not transfer
+to unseen environment instances, making online partner
+generation a natural choice.
+Since UPD w/o ℓ already performs strongly, one practical
+implication of our work is that extending E3T with
+randomised mixture coefficients and large-scale parallel
+partner generation may provide a stronger population-free
+baseline than standard E3T.
+More generally, UPD can be understood as a framework
+that operates over a partner space. In our experiments,
+this is instantiated using SFL and the space is defined by
+a stochastic generator, but in principle other UED methods
+could be used and the partner space could also be defined
+by partner populations or latent partner spaces (Liang et al.,
+2024) when these are available. Exploring richer partner
+spaces within our framework is an interesting direction
+for future work. While UPD avoids explicit population
+pretraining, it shifts computation toward large-scale online
+partner evaluation. In practice this tradeoff is favourable in
+highly vectorised simulators such as JAX environments, but
+may be less advantageous in settings where environment
+interaction is expensive.
+8. Conclusion
+We introduced Unsupervised Partner Design (UPD), a
+population-free method for training ad-hoc teamwork
+agents via learnability-based partner selection. Across
+multiple benchmarks and a human study, UPD achieves
+strong AHT performance without pre-trained partner
+populations or manual parameter tuning. These results
+suggest that adaptive partner curricula provide a practical
+and scalable approach to improving generalisation in
+cooperative multi-agent systems.
+Impact Statement
+This work seeks to improve methods for training agents that
+can cooperate with previously unseen partners, especially
+humans. While our contributions are evaluated in controlled
+research environments, improved human–AI coordination
+may eventually be applied in real-world interactive sys-
+tems. Here, possible deployment issues that could arise
+from human-AI coordination failures or misalignment re-
+quire careful consideration. These concerns are not unique
+to our approach and are shared broadly across research on
+interactive and collaborative AI systems. We do not foresee
+specific new ethical risks introduced by this work beyond
+those commonly associated with human–AI interaction.
+Acknowledgements
+We thank the anonymous reviewers for their feedback, es-
+pecially for suggesting to additionally compare to ROTATE
+and for suggesting to extend our discussion on UPD and
+convention selection. The authors also thank the Interna-
+tional Max Planck Research School for Intelligent Systems
+(IMPRS- IS) for supporting C. Ruhdorfer and V . Oei.
+References
+Albrecht, S. V . and Ramamoorthy, S. A game-theoretic
+model and best-response learning method for ad hoc
+coordination in multiagent systems. In Gini, M. L.,
+Shehory, O., Ito, T., and Jonker, C. M. (eds.),Interna-
+tional conference on Autonomous Agents and Multi-Agent
+Systems, AAMAS ’13, Saint Paul, MN, USA, May 6-10,
+2013, pp. 1155–1156. IFAAMAS, 2013. URL http:
+//dl.acm.org/citation.cfm?id=2485118.
+Albrecht, S. V ., Crandall, J. W., and Ramamoorthy, S. Belief
+and truth in hypothesised behaviours.Artif. Intell., 235:
+63–94, 2016. doi: 10.1016/J.ARTINT.2016.02.004. URL
+https://doi.org/10.1016/j.artint.2016.
+02.004.
+Bard, N., Foerster, J. N., Chandar, S., Burch, N., Lanctot,
+M., Song, H. F., Parisotto, E., Dumoulin, V ., Moitra,
+S., Hughes, E., Dunning, I., Mourad, S., Larochelle, H.,
+Bellemare, M. G., and Bowling, M. The hanabi challenge:
+A new frontier for AI research.Artif. Intell., 280:103216,
+2020. doi: 10.1016/J.ARTINT.2019.103216. URL
+https://doi.org/10.1016/j.artint.2019.
+103216.
+Barrett, S., Agmon, N., Hazon, N., Kraus, S., and Stone, P.
+Communicating with unknown teammates. In Bazzan,
+A. L. C., Huhns, M. N., Lomuscio, A., and Scerri, P.
+(eds.),International conference on Autonomous Agents
+and Multi-Agent Systems, AAMAS ’14, Paris, France,
+May 5-9, 2014, pp. 1433–1434. IFAAMAS/ACM, 2014.
+URL http://dl.acm.org/citation.cfm?id
+=2617509.
+Barrett, S., Rosenfeld, A., Kraus, S., and Stone, P. Making
+friends on the fly: Cooperating with new teammates.Artif.
+Intell., 242:132–171, 2017. doi: 10.1016/J.ARTINT.2
+016.10.005. URL https://doi.org/10.1016/j.
+artint.2016.10.005.
+Beukman, M., Coward, S., Matthews, M. T., Fellows, M.,
+Jiang, M., Dennis, M. D., and Foerster, J. N. Refining
+minimax regret for unsupervised environment design. In
+Forty-first International Conference on Machine Learn-
+ing, ICML 2024, Vienna, Austria, July 21-27, 2024. Open-
+Review.net, 2024. URL https://openreview.n
+et/forum?id=LRnXPxDksA.
+9
+===== PAGE 10 =====
+Unsupervised Partner Design
+Bonnet, C., Luo, D., Byrne, D. J., Surana, S., Abramowitz,
+S., Duckworth, P., Coyette, V ., Midgley, L. I., Tegegn, E.,
+Kalloniatis, T., Mahjoub, O., Macfarlane, M., Smit, A. P.,
+Grinsztajn, N., Boige, R., Waters, C. N., Mimouni, M.
+A. A., Sob, U. A. M., de Kock, R. J., Singh, S., Furelos-
+Blanco, D., Le, V ., Pretorius, A., and Laterre, A. Jumanji:
+a diverse suite of scalable reinforcement learning envi-
+ronments in JAX. InThe Twelfth International Confer-
+ence on Learning Representations, 2024. URL https:
+//openreview.net/forum?id=C4CxQmp9wc.
+Bradbury, J., Frostig, R., Hawkins, P., Johnson, M. J., Leary,
+C., Maclaurin, D., Necula, G., Paszke, A., VanderPlas, J.,
+Wanderman-Milne, S., and Zhang, Q. JAX: composable
+transformations of Python+NumPy programs, 2018. URL
+http://github.com/jax-ml/jax.
+Carroll, M., Shah, R., Ho, M. K., Griffiths, T., Seshia,
+S. A., Abbeel, P., and Dragan, A. D. On the utility
+of learning about humans for human-ai coordination.
+In Wallach, H. M., Larochelle, H., Beygelzimer, A.,
+d’Alch´e-Buc, F., Fox, E. B., and Garnett, R. (eds.),Ad-
+vances in Neural Information Processing Systems 32:
+Annual Conference on Neural Information Processing
+Systems 2019, NeurIPS 2019, December 8-14, 2019,
+Vancouver, BC, Canada, pp. 5175–5186, 2019. URL
+https://proceedings.neurips.cc/paper
+/2019/hash/f5b1b89d98b7286673128a5fb
+112cb9a-Abstract.html.
+Carvalho, W., Goddla, V ., Sinha, I., Shin, H., and Jha, K.
+Nicewebrl: a python library for human subject experi-
+ments with reinforcement learning environments, 2025.
+URLhttps://arxiv.org/abs/2508.15693.
+Chaudhary, P., Liang, Y ., Chen, D., Du, S. S., and Jaques,
+N. Improving human-ai coordination through adversarial
+training and generative models.CoRR, abs/2504.15457,
+2025. doi: 10.48550/ARXIV.2504.15457. URL https:
+//doi.org/10.48550/arXiv.2504.15457.
+Cho, K., van Merri ¨enboer, B., Bahdanau, D., and Ben-
+gio, Y . On the properties of neural machine transla-
+tion: Encoder–decoder approaches. In Wu, D., Carpuat,
+M., Carreras, X., and Vecchi, E. M. (eds.),Proceed-
+ings of SSST-8, Eighth Workshop on Syntax, Semantics
+and Structure in Statistical Translation, pp. 103–111,
+Doha, Qatar, October 2014. Association for Computa-
+tional Linguistics. doi: 10.3115/v1/W14-4012. URL
+https://aclanthology.org/W14-4012/.
+de Witt, C. S., Gupta, T., Makoviichuk, D., Makoviychuk,
+V ., Torr, P. H. S., Sun, M., and Whiteson, S. Is in-
+dependent learning all you need in the starcraft multi-
+agent challenge?CoRR, abs/2011.09533, 2020. URL
+https://arxiv.org/abs/2011.09533.
+DeepMind, Babuschkin, I., Baumli, K., Bell, A., Bhupati-
+raju, S., Bruce, J., Buchlovsky, P., Budden, D., Cai,
+T., Clark, A., Danihelka, I., Dedieu, A., Fantacci, C.,
+Godwin, J., Jones, C., Hemsley, R., Hennigan, T., Hes-
+sel, M., Hou, S., Kapturowski, S., Keck, T., Kemaev,
+I., King, M., Kunesch, M., Martens, L., Merzic, H.,
+Mikulik, V ., Norman, T., Papamakarios, G., Quan, J.,
+Ring, R., Ruiz, F., Sanchez, A., Sartran, L., Schnei-
+der, R., Sezener, E., Spencer, S., Srinivasan, S., Stano-
+jevi´c, M., Stokowiec, W., Wang, L., Zhou, G., and Vi-
+ola, F. The DeepMind JAX Ecosystem, 2020. URL
+http://github.com/google-deepmind.
+Dennis, M., Jaques, N., Vinitsky, E., Bayen, A. M., Rus-
+sell, S., Critch, A., and Levine, S. Emergent com-
+plexity and zero-shot transfer via unsupervised environ-
+ment design. In Larochelle, H., Ranzato, M., Hadsell,
+R., Balcan, M., and Lin, H. (eds.),Advances in Neu-
+ral Information Processing Systems 33: Annual Confer-
+ence on Neural Information Processing Systems 2020,
+NeurIPS 2020, December 6-12, 2020, virtual, 2020. URL
+https://proceedings.neurips.cc/paper
+/2020/hash/985e9a46e10005356bbaf1942
+49f6856-Abstract.html.
+Erlebach, H. and Cook, J. RACCOON: Regret-based adap-
+tive curricula for cooperation. InCoordination and Coop-
+eration for Multi-Agent Reinforcement Learning Methods
+Workshop, 2024. URL https://openreview.net
+/forum?id=jAH5JNY3Qd.
+Florensa, C., Held, D., Geng, X., and Abbeel, P. Automatic
+goal generation for reinforcement learning agents. In
+Dy, J. G. and Krause, A. (eds.),Proceedings of the 35th
+International Conference on Machine Learning, ICML
+2018, Stockholmsm¨assan, Stockholm, Sweden, July 10-15,
+2018, volume 80 ofProceedings of Machine Learning
+Research, pp. 1514–1523. PMLR, 2018. URL http:
+//proceedings.mlr.press/v80/florensa
+18a.html.
+Foster, T., Sims, A., Forkel, J., and Foerster, J. N. LILO:
+Learning to reason at the frontier of learnability. InThe
+Thirty-ninth Annual Conference on Neural Information
+Processing Systems, 2026. URL https://openrevi
+ew.net/forum?id=8HYeWMf0W3.
+Harris, C. R., Millman, K. J., van der Walt, S. J., Gommers,
+R., Virtanen, P., Cournapeau, D., Wieser, E., Taylor, J.,
+Berg, S., Smith, N. J., Kern, R., Picus, M., Hoyer, S., van
+Kerkwijk, M. H., Brett, M., Haldane, A., del R ´ıo, J. F.,
+Wiebe, M., Peterson, P., G´erard-Marchant, P., Sheppard,
+K., Reddy, T., Weckesser, W., Abbasi, H., Gohlke, C.,
+and Oliphant, T. E. Array programming with NumPy.
+Nature, 585(7825):357–362, September 2020. doi: 10.1
+10
+===== PAGE 11 =====
+Unsupervised Partner Design
+038/s41586-020-2649-2. URL https://doi.org/
+10.1038/s41586-020-2649-2.
+Heek, J., Levskaya, A., Oliver, A., Ritter, M., Rondepierre,
+B., Steiner, A., and van Zee, M. Flax: A neural network
+library and ecosystem for JAX, 2023. URL http://
+github.com/google/flax.
+Hu, H., Lerer, A., Peysakhovich, A., and Foerster, J. N.
+”other-play” for zero-shot coordination. InProceedings of
+the 37th International Conference on Machine Learning,
+ICML 2020, 13-18 July 2020, Virtual Event, volume 119
+ofProceedings of Machine Learning Research, pp. 4399–
+4410. PMLR, 2020. URL http://proceedings.
+mlr.press/v119/hu20a.html.
+Hunter, J. D. Matplotlib: A 2d graphics environment.Com-
+puting in Science & Engineering, 9(3):90–95, 2007. doi:
+10.1109/MCSE.2007.55.
+Jha, K., Carvalho, W., Liang, Y ., Du, S. S., Kleiman-Weiner,
+M., and Jaques, N. Cross-environment cooperation en-
+ables zero-shot multi-agent coordination, 2025. URL
+https://arxiv.org/abs/2504.12714.
+Jiang, M., Dennis, M., Parker-Holder, J., Foerster, J. N.,
+Grefenstette, E., and Rockt¨aschel, T. Replay-guided ad-
+versarial environment design. In Ranzato, M., Beygelz-
+imer, A., Dauphin, Y . N., Liang, P., and Vaughan, J. W.
+(eds.),Advances in Neural Information Processing Sys-
+tems 34: Annual Conference on Neural Information Pro-
+cessing Systems 2021, NeurIPS 2021, December 6-14,
+2021, virtual, pp. 1884–1897, 2021a. URL https:
+//proceedings.neurips.cc/paper/2021/
+hash/0e915db6326b6fb6a3c56546980a8c9
+3-Abstract.html.
+Jiang, M., Grefenstette, E., and Rockt¨aschel, T. Prioritized
+level replay. In Meila, M. and Zhang, T. (eds.),Proceed-
+ings of the 38th International Conference on Machine
+Learning, volume 139 ofProceedings of Machine Learn-
+ing Research, pp. 4940–4950. PMLR, 18–24 Jul 2021b.
+Kurach, K., Raichuk, A., Stanczyk, P., Zajac, M., Bachem,
+O., Espeholt, L., Riquelme, C., Vincent, D., Michalski,
+M., Bousquet, O., and Gelly, S. Google research football:
+A novel reinforcement learning environment. InThe
+Thirty-Fourth AAAI Conference on Artificial Intelligence,
+AAAI 2020, The Thirty-Second Innovative Applications of
+Artificial Intelligence Conference, IAAI 2020, The Tenth
+AAAI Symposium on Educational Advances in Artificial
+Intelligence, EAAI 2020, New York, NY, USA, February
+7-12, 2020, pp. 4501–4510. AAAI Press, 2020. doi:
+10.1609/AAAI.V34I04.5878. URL https://doi.or
+g/10.1609/aaai.v34i04.5878.
+Li, W., Varakantham, P., and Li, D. Generalization through
+diversity: improving unsupervised environment design.
+InProceedings of the Thirty-Second International Joint
+Conference on Artificial Intelligence, IJCAI ’23, 2023a.
+ISBN 978-1-956792-03-4. doi: 10.24963/ijcai.2023/601.
+Li, Y ., Zhang, S., Sun, J., Du, Y ., Wen, Y ., Wang, X., and
+Pan, W. Cooperative open-ended learning framework
+for zero-shot coordination. In Krause, A., Brunskill, E.,
+Cho, K., Engelhardt, B., Sabato, S., and Scarlett, J. (eds.),
+Proceedings of the 40th International Conference on Ma-
+chine Learning, volume 202 ofProceedings of Machine
+Learning Research, pp. 20470–20484. PMLR, 23–29 Jul
+2023b. URL https://proceedings.mlr.pres
+s/v202/li23au.html.
+Liang, Y ., Chen, D., Gupta, A., Du, S. S., and Jaques,
+N. Learning to cooperate with humans using generative
+agents. InThe Thirty-eighth Annual Conference on Neu-
+ral Information Processing Systems, 2024. URL https:
+//openreview.net/forum?id=v4dXL3LsGX.
+Lou, X., Guo, J., Zhang, J., Wang, J., Huang, K., and Du, Y .
+PECAN: leveraging policy ensemble for context-aware
+zero-shot human-ai coordination. In Agmon, N., An,
+B., Ricci, A., and Yeoh, W. (eds.),Proceedings of the
+2023 International Conference on Autonomous Agents
+and Multiagent Systems, AAMAS 2023, London, United
+Kingdom, 29 May 2023 - 2 June 2023, pp. 679–688. ACM,
+2023. doi: 10.5555/3545946.3598700. URL https:
+//dl.acm.org/doi/10.5555/3545946.359
+8700.
+Mirsky, R., Carlucho, I., Rahman, A., Fosong, E., Macke,
+W., Sridharan, M., Stone, P., and Albrecht, S. V . A sur-
+vey of ad hoc teamwork research. In Baumeister, D. and
+Rothe, J. (eds.),Multi-Agent Systems - 19th European
+Conference, EUMAS 2022, D¨usseldorf, Germany, Septem-
+ber 14-16, 2022, Proceedings, volume 13442 ofLecture
+Notes in Computer Science, pp. 275–293. Springer, 2022.
+doi: 10.1007/978-3-031-20614-6 \ 16. URL https://
+doi.org/10.1007/978-3-031-20614-6_16.
+Monette, N., Letcher, A., Beukman, M., Jackson, M. T.,
+Rutherford, A., Goldie, A. D., and Foerster, J. N. An
+optimisation framework for unsupervised environment
+design.Reinforcement Learning Journal, 6:2135–2158,
+2025.
+Papoudakis, G., Christianos, F., Sch¨afer, L., and Albrecht,
+S. V . Benchmarking multi-agent deep reinforcement
+learning algorithms in cooperative tasks. In Vanschoren,
+J. and Yeung, S. (eds.),Proceedings of the Neural In-
+formation Processing Systems Track on Datasets and
+Benchmarks 1, NeurIPS Datasets and Benchmarks 2021,
+December 2021, virtual, 2021. URL https://data
+11
+===== PAGE 12 =====
+Unsupervised Partner Design
+sets-benchmarks-proceedings.neurips.c
+c/paper/2021/hash/a8baa56554f96369ab
+93e4f3bb068c22-Abstract-round1.html.
+Parker-Holder, J., Jiang, M., Dennis, M., Samvelyan, M.,
+Foerster, J., Grefenstette, E., and Rockt¨aschel, T. Evolv-
+ing curricula with regret-based environment design. In
+Chaudhuri, K., Jegelka, S., Song, L., Szepesvari, C., Niu,
+G., and Sabato, S. (eds.),Proceedings of the 39th In-
+ternational Conference on Machine Learning, volume
+162 ofProceedings of Machine Learning Research, pp.
+17473–17498. PMLR, 17–23 Jul 2022.
+Rahman, A., H¨opner, N., Christianos, F., and Albrecht, S. V .
+Towards open ad hoc teamwork using graph-based policy
+learning. In Meila, M. and Zhang, T. (eds.),Proceedings
+of the 38th International Conference on Machine Learn-
+ing, ICML 2021, 18-24 July 2021, Virtual Event, volume
+139 ofProceedings of Machine Learning Research, pp.
+8776–8786. PMLR, 2021. URL http://proceedi
+ngs.mlr.press/v139/rahman21a.html.
+Rahman, A., Fosong, E., Carlucho, I., and Albrecht, S. V .
+Generating teammates for training robust ad hoc team-
+work agents via best-response diversity.Trans. Mach.
+Learn. Res., 2023, 2023. URL https://openrevi
+ew.net/forum?id=l5BzfQhROl.
+Ruhdorfer, C., Bortoletto, M., and Bulling, A. The yokai
+learning environment: Tracking beliefs over space and
+time.arXiv preprint arXiv:2508.12480, 2025a.
+Ruhdorfer, C., Bortoletto, M., Penzkofer, A., and Bulling, A.
+The overcooked generalisation challenge: Evaluating co-
+operation with novel partners in unknown environments
+using unsupervised environment design.Transactions on
+Machine Learning Research, 2025b. ISSN 2835-8856.
+URL https://openreview.net/forum?id=
+K2KtcMlW6j.
+Rutherford, A., Ellis, B., Gallici, M., Cook, J., Lupu, A.,
+Ingvarsson, G., Willi, T., Khan, A., de Witt, C. S., Souly,
+A., et al. Jaxmarl: Multi-agent rl environments in jax. In
+Second Agent Learning in Open-Endedness Workshop,
+2023.
+Rutherford, A., Beukman, M., Willi, T., Lacerda, B.,
+Hawes, N., and Foerster, J. N. No regrets: Investigat-
+ing and improving regret approximations for curricu-
+lum discovery. In Globersons, A., Mackey, L., Bel-
+grave, D., Fan, A., Paquet, U., Tomczak, J. M., and
+Zhang, C. (eds.),Advances in Neural Information Pro-
+cessing Systems 38: Annual Conference on Neural Infor-
+mation Processing Systems 2024, NeurIPS 2024, Vancou-
+ver, BC, Canada, December 10 - 15, 2024, 2024. URL
+http://papers.nips.cc/paper_files/pap
+er/2024/hash/1d0ed12c3fda52f2c241a0c
+ebcf739a6-Abstract-Conference.html.
+Samvelyan, M., Khan, A., Dennis, M. D., Jiang, M., Parker-
+Holder, J., Foerster, J. N., Raileanu, R., and Rockt¨aschel,
+T. MAESTRO: Open-ended environment design for multi-
+agent reinforcement learning. InThe Eleventh Interna-
+tional Conference on Learning Representations, 2023.
+Schulman, J., Wolski, F., Dhariwal, P., Radford, A., and
+Klimov, O. Proximal policy optimization algorithms.
+CoRR, abs/1707.06347, 2017. URL http://arxiv.
+org/abs/1707.06347.
+Stone, P., Kaminka, G., Kraus, S., and Rosenschein, J. Ad
+hoc autonomous agent teams: Collaboration without pre-
+coordination. InProceedings of the AAAI Conference on
+Artificial Intelligence, volume 24, pp. 1504–1509, 2010.
+Strouse, D., McKee, K. R., Botvinick, M. M., Hughes,
+E., and Everett, R. Collaborating with humans without
+human data. In Ranzato, M., Beygelzimer, A., Dauphin,
+Y . N., Liang, P., and Vaughan, J. W. (eds.),Advances
+in Neural Information Processing Systems 34: Annual
+Conference on Neural Information Processing Systems
+2021, NeurIPS 2021, December 6-14, 2021, virtual, pp.
+14502–14515, 2021. URL https://proceedings.
+neurips.cc/paper/2021/hash/797134c3e
+42371bb4979a462eb2f042a-Abstract.html.
+Team, T. P. D. pandas-dev/pandas: Pandas. February 2020.
+doi: 10.5281/zenodo.3509134. URL https://doi.
+org/10.5281/zenodo.3509134.
+Tobin, J., Fong, R., Ray, A., Schneider, J., Zaremba, W., and
+Abbeel, P. Domain randomization for transferring deep
+neural networks from simulation to the real world. In
+2017 IEEE/RSJ International Conference on Intelligent
+Robots and Systems, IROS 2017, Vancouver, BC, Canada,
+September 24-28, 2017, pp. 23–30. IEEE, 2017. doi:
+10.1109/IROS.2017.8202133. URL https://doi.
+org/10.1109/IROS.2017.8202133.
+Tzannetos, G., Ribeiro, B. G., Kamalaruban, P., and Singla,
+A. Proximal curriculum for reinforcement learning agents.
+Transactions on Machine Learning Research, 2023, 2023.
+URL https://openreview.net/forum?id=
+8WUyeeMxMH.
+Virtanen, P., Gommers, R., Oliphant, T. E., Haberland, M.,
+Reddy, T., Cournapeau, D., Burovski, E., Peterson, P.,
+Weckesser, W., Bright, J., van der Walt, S. J., Brett, M.,
+Wilson, J., Millman, K. J., Mayorov, N., Nelson, A. R. J.,
+Jones, E., Kern, R., Larson, E., Carey, C. J., Polat, ˙I.,
+Feng, Y ., Moore, E. W., VanderPlas, J., Laxalde, D.,
+Perktold, J., Cimrman, R., Henriksen, I., Quintero, E. A.,
+Harris, C. R., Archibald, A. M., Ribeiro, A. H., Pedregosa,
+12
+===== PAGE 13 =====
+Unsupervised Partner Design
+F., van Mulbregt, P., and SciPy 1.0 Contributors. SciPy
+1.0: Fundamental Algorithms for Scientific Computing
+in Python.Nature Methods, 17:261–272, 2020. doi:
+10.1038/s41592-019-0686-2.
+Wang, C., Rahman, A., Cui, J., Sung, Y ., and Stone, P.
+Rotate: Regret-driven open-ended training for ad hoc
+teamwork.arXiv preprint arXiv:2505.23686, 2025.
+Wang, R., Lehman, J., Clune, J., and Stanley, K. O. Paired
+open-ended trailblazer (POET): endlessly generating in-
+creasingly complex and diverse learning environments
+and their solutions.CoRR, abs/1901.01753, 2019.
+Wang, R., Lehman, J., Rawal, A., Zhi, J., Li, Y ., Clune,
+J., and Stanley, K. O. Enhanced POET: open-ended re-
+inforcement learning through unbounded invention of
+learning challenges and their solutions. InProceedings of
+the 37th International Conference on Machine Learning,
+ICML 2020, 13-18 July 2020, Virtual Event, Proceedings
+of Machine Learning Research, pp. 9940–9951. PMLR,
+2020. URL http://proceedings.mlr.press/
+v119/wang20l.html.
+Yan, X., Guo, J., Lou, X., Wang, J., Zhang, H., and
+Du, Y . An efficient end-to-end training approach for
+zero-shot human-ai coordination. In Oh, A., Naumann,
+T., Globerson, A., Saenko, K., Hardt, M., and Levine,
+S. (eds.),Advances in Neural Information Processing
+Systems 36: Annual Conference on Neural Informa-
+tion Processing Systems 2023, NeurIPS 2023, New Or-
+leans, LA, USA, December 10 - 16, 2023, 2023. URL
+http://papers.nips.cc/paper_files/pap
+er/2023/hash/07a363fd2263091c2063998
+e0034999c-Abstract-Conference.html.
+You, W.-S., Ha, T.-G., Lee, S.-Y ., and Kim, K.-J. Automatic
+curriculum design for zero-shot human-ai coordination.
+IEEE Access, 2025.
+Yu, C., Gao, J., Liu, W., Xu, B., Tang, H., Yang, J., Wang,
+Y ., and Wu, Y . Learning zero-shot cooperation with
+humans, assuming humans are biased. InThe Eleventh
+International Conference on Learning Representations,
+2023. URL https://openreview.net/forum
+?id=TrwE8l9aJzs.
+Zhao, R., Song, J., Yuan, Y ., Hu, H., Gao, Y ., Wu, Y .,
+Sun, Z., and Yang, W. Maximum entropy population-
+based training for zero-shot human-ai coordination. In
+Williams, B., Chen, Y ., and Neville, J. (eds.),Thirty-
+Seventh AAAI Conference on Artificial Intelligence, AAAI
+2023, Thirty-Fifth Conference on Innovative Applica-
+tions of Artificial Intelligence, IAAI 2023, Thirteenth
+Symposium on Educational Advances in Artificial In-
+telligence, EAAI 2023, Washington, DC, USA, Febru-
+ary 7-14, 2023, pp. 6145–6153. AAAI Press, 2023.
+doi: 10.1609/AAAI.V37I5.25758. URL https:
+//doi.org/10.1609/aaai.v37i5.25758.
+13
+===== PAGE 14 =====
+Unsupervised Partner Design
+A. Infrastructure & Tools
+We ran our experiments on a server system equipped with NVIDIA H100-NVL GPUs with 94 GB of memory and AMD
+EPYC 9454 CPUs. All training runs were executed on a single GPU. We trained our models using Jax (Bradbury et al.,
+2018), Flax (Heek et al., 2023) and Optax (DeepMind et al., 2020). We performed our analyses using NumPy (Harris
+et al., 2020), Pandas (Team, 2020), SciPy (Virtanen et al., 2020) and Matplotlib (Hunter, 2007). Our single-file IPPO
+implementation was based on the one provided by JaxMARL (Rutherford et al., 2023). Our basis for the FCP, E3T, and by
+extension MEP and UPD implementations was the published code of Jha et al. (2025). ROTATE and evaluation partners
+were generated using the code of Wang et al. (2025). Our curriculum learning algorithm is SFL and we base our code on the
+open-source release of Rutherford et al. (2024).
+Our experiments only required a fraction of the computing power that the system above offers. At a minimum, our
+experiments are reproducible using GPUs with 16 GB of memory, possibly even less. Individual Overcooked-AI training
+runs typically run on the order of minutes to hours depending on the method: Population-based baselines and ROTATE are
+more expensive due to pretraining/open-ended iterations. OGC experiments usually take a couple of hours but finish in well
+under a day.
+Our human-AI experiments were conducted using NiceWebRL (Carvalho et al., 2025).
+B. Reproducibility Statement
+To reproduce our work, we provide all key hyperparameters in this document. Our project page is available at https:
+//git.hcics.simtech.uni-stuttgart.de/public-projects/UPD.
+Transparency NoteAn earlier version of this paper contained implementation and configuration issues affecting baseline
+experiments. After correcting and rerunning the affected experiments, baseline performance improved, but the main
+conclusions of the paper remained unchanged.
+C. UPD and Convention Selection Extended
+Here, we extend the discussion in Section 4.4. Section 4.4 illustrates conceptually how the learnability formulation and
+convention selection interact. Assume a matrix game such as the following:
+up down
+up 1 0
+down 0 1
+.(10)
+Here, naive self-play would converge on one equilibrium because it maximises the self-play objective JSP(π) which admits
+two equally good but mutually exclusive solutions: πup
+SP and πdown
+SP where both agents always play up or down respectively.
+They are mutually incompatible since
+Eτ∼(π up
+SP ,πup
+SP )[R(τ)] =E τ∼(π down
+SP ,πdown
+SP )[R(τ)] = 1(11)
+but
+Eτ∼(π up
+SP ,πdown
+SP )[R(τ)] = 0.(12)
+The goal in zero-shot coordination and ad-hoc teamwork is to learn policies that generalise across different partners and to
+specifically avoid overfitting to a single equilibrium. UPD does this via two interacting mechanisms: by creating partners
+based on the current πego and by selecting partners using a learnability score ℓ that is based on the variance of outcomes.
+Assume, for the sake of argument, that we now perform the UPD update operator on πup
+SP (i.e. πego =π up
+SP ) and that UPD
+creates three new partners viaS p:
+πup
+p ={a|p(a) = 1ifa=upelse0}(13)
+πdown
+p ={a|p(a) = 1ifa=downelse0}(14)
+πmix
+p ={a|p(a) = 0.5ifa=upelse0.5}(15)
+It is clear that Varτ∼(π up
+SP ,πup
+p )[R(τ)] = Var τ∼(π up
+SP ,πdownp )[R(τ)] = 0 . This aligns with the intuition presented in Sec-
+tion 4.1: πup
+p as a partner is too easy, since the ego is already performing optimally with them. Analogously, since
+14
+===== PAGE 15 =====
+Unsupervised Partner Design
+Table 3.We additionally compare with ROTATE (Wang et al., 2025) and a fine-tuned version of UPD with curriculum hyperparameters
+picked per Overcooked layout (see Table 5). Average returns (mean ± std.) with evaluation populations in Overcooked-AI. We average
+over both starting positions. The best results are inbold, second-best are underlined .
+Method CRoom AA CR CC FC Average % Gain rel. to E3T
+ROTATE119.9±7.9147.7±22.680.5±7.258.1±0.152.1±5.191.7±6.8+15.1%
+UPD (Ours)107.5±2.8 181.4±6.4 69.2±5.6 64.5±1.3 48.7±2.8 94.4±2.3 +18.0%
+UPD (fine-tuned)111.6±7.7 201.8±3.079.6±5.1 66.7±1.151.3±1.3 102.3±0.6+25.9%
+Eτ∼(π up
+SP ,πdownp )[R(τ)] = 0 across all possible testing games, πdown
+p is currently incompatible. Here, UPD would pick πmix
+p
+sinceVar τ∼(π up
+SP ,πmixp )[R(τ)] = 0.25>Var τ∼(π up
+SP ,πup
+p )[R(τ)] = Varτ∼(π up
+SP ,πdownp )[R(τ)].
+Assume now that after training with πmix
+p , the ego policy no longer deterministically selects up, but instead plays down
+with non-zero probability. In this case, interactions with πdown
+p no longer yield deterministic failure, and therefore begin to
+induce non-zero return variance. Consequently, partners that were previously uninformative under ℓvar may later become
+learnable training partners.
+This illustrates an important property of UPD: partner usefulness is not static, but depends on the current ego policy. As
+the ego policy changes over training, the set of high-learnability partners also changes, naturally inducing an adaptive
+curriculum over coordination conventions.
+Large-scale generation without learnability scoringInterestingly, this example also suggests why large-scale online
+partner generation alone may already induce useful curricula even without explicit learnability-based filtering. As the
+ego policy evolves, different randomly generated partners naturally vary in compatibility and coordination difficulty.
+Consequently, the distribution of effective training interactions changes over time, exposing the ego agent to progressively
+different coordination conventions and partner behaviours. Learnability-based selection can therefore be interpreted as a
+mechanism for prioritising particularly informative partners within an already adaptive partner-generation process.
+D. Additional Comparison with ROTATE and fine-tuned UPD
+In Table 3 we additionally compare against ROTATE (Wang et al., 2025) and fine-tuned UPD. ROTATE uses the implemen-
+tation, hyperparameters, and network architecture as provided by Wang et al. (2025) since it shows great performance in the
+original work and as such has been independently tuned (see Appendix E). ROTATE uses the recurrent policy proposed by
+Wang et al. (2025). While we otherwise compare 6 seeds, for ROTATE we report3 seeds due to its runtime. Additionally, to
+show that UPD could in principle benefit from a set of per-layout hyperparameters, we also included a version of UPD in
+which only the curriculum parameters were fine-tuned per layout (see Table 5). Here we also report results from3seeds.
+UPD (fine-tuned) achieves highest average returns, followed by UPD, and then ROTATE. ROTATE performs best on three
+layouts (CRoom, CR, FC) but sometimes error bars overlap with UPD (FC) or fine-tuned UPD (CR & FC). Our takeaway is
+that UPD, despite its simplicity, can compete with strong modern AHT methods. Additionally, we also see that while UPD
+generally works well with a shared hyperparameter configuration, it can also benefit from layout-specific tuning.
+E. Additional Training Details
+E.1. Reinforcement Learning Details
+We employ independent PPO (de Witt et al., 2020; Schulman et al., 2017) for all methods in the main paper. We give an
+overview of all hyperparameters in Table 4, Table 6, and considered ranges in Table 7. UPD extends SFL to the partner
+space and therefore inherits several hyperparameters introduced by (Rutherford et al., 2024). Specifically, (1) # generated
+agents controls how many partners are created for learnability scoring, (2) the buffer size controls the number of agents
+admitted to the buffer, (3) N controls the number of scoring games, (4) R the rate at which the buffer is refreshed, and (5) ρ
+determines the proportion of partners drawn from the buffer versus newly created partners during each learning iteration.
+Forρ, Rutherford et al. (2024) recommend a default value of0.5.
+We use several baselines in the paper: SP, FCP, MEP, E3T and ROTATE. We base these baselines on several open-source
+implementations. For FCP and E3T specifically, we built upon the open-source code of (Jha et al., 2025) while ROTATE
+15
+===== PAGE 16 =====
+Unsupervised Partner Design
+Table 4.Default hyperparameters used in our Overcooked-AI experiments.
+Category Value
+# Environments 512
+Total timesteps5×10 7
+Reward shaping horizon3×10 7
+Learning rate1×10 −3
+Learning rate annealing Linear
+Seeds used 0 - 5
+PPO hyperparameters
+PPO rollout length 400 steps
+PPO epochs 6
+Minibatches per update 8
+Discount factor (γ) 0.99
+GAE parameter (λ) 0.95
+Clipping threshold 0.2
+Entropy coefficient 0.01
+Value loss coefficient 1.0
+Gradient norm clipping 0.5
+Architecture (shared for actor and critic)
+Embedding layers 2
+Actor layers 4
+Critic layers 4
+Fully connected layer size 256
+GRU hidden size 256
+Activation Tanh
+Layer normalisation Enabled
+Partner modelling (E3T/UPD only)
+Auxiliary model depth 4 layers (size 64)
+MOA loss coefficient 1.0
+Trajectory history length 5 steps
+Action embedding size 256
+Prediction normalisation L2 norm
+UPD-specific parameters
+# generated agents (SFL batch size) 4000
+Buffer size (|B|) 512
+N10
+R4
+Sample ratioρ0.5
+Table 5.UPD fine-tuned hyperparameters which evaluate how much UPD could benefit from layout-specific curriculum hyperparameters.
+Category CRoom FT AA FT CR FT CC FT FC FT
+Buffer size (|B|) 1024 1024 128 1024 128
+N5 10 5 10 5
+R4 8 1 1 1
+# sampled partners 128 128 512 128 512
+16
+===== PAGE 17 =====
+Unsupervised Partner Design
+Table 6.ROTATE hyperparameters use the values reported in (Wang et al., 2025) and the respective code release. We reused their
+hyperparameters as they showed strong performance in the original publication.
+Category CRoom AA CR CC FC
+# Environments16 16 16 16 16
+PPO rollout length400 400 400 400 400
+Reward shaping horizon Full Full Full Full Full
+Discount factor (γ)0.99 0.99 0.99 0.99 0.99
+GAE parameter (λ)0.95 0.95 0.95 0.95 0.95
+Value loss coefficient0.5 0.5 0.5 0.5 0.5
+Gradient norm clipping1.0 1.0 1.0 1.0 1.0
+Seeds used 20374 - 20376 20374 - 20376 20374 - 20376 20374 - 20376 20374 - 20376
+ROTATE specific
+Open Ended Iterations 30 30 20 20 20
+Regret SP Weight 3.0 2.0 2.0 2.0 2.0
+Teammate PPO hyperparameters
+Timesteps per Iter (T)6×10 6 6×10 6 1.6×10 7 1.6×10 7 1.6×10 7
+Learning rate (T)1×10 −4 1×10 −4 1×10 −3 1×10 −3 1×10 −3
+Learning rate annealing (T) Yes No No No No
+PPO epochs (T)20 20 20 20 20
+Minibatches per update (T)8 8 8 8 8
+Clipping threshold (ϵ) (T)0.2 0.3 0.1 0.1 0.1
+Entropy coefficient (T)0.01 0.01 0.05 0.05 0.05
+Ego PPO hyperparameters
+Timesteps per Iter (Ego)2×10 6 2×10 6 6×10 6 6×10 6 6×10 6
+Learning rate (Ego)5×10 −5 5×10 −5 3×10 −5 5×10 −5 1×10 −5
+Learning rate annealing (Ego) No No No No No
+PPO epochs (Ego)10 10 10 10 5
+Minibatches per update (Ego)8 8 8 8 8
+Clipping threshold (ϵ) (Ego)0.1 0.1 0.1 0.1 0.1
+Entropy coefficient (Ego)0.001 0.001 0.001 0.001 1×10 −4
+Table 7.Training hyperparameters search space used for the AHT methods used in the Overcooked-AI experiments. We put the choice
+inbold. The choice is shared between the AHT methods. To decide which parameters to keep, we looked at evaluation results with a
+BRDiv population as a cheap proxy. Finally, for OGC experiments, we reused the above-found hyperparameters in bold and only added
+more environments (1024), steps (1×10 9), and actor and critic layers (1 extra; see text). If CV 2 is used we pick the stability constant as
+δ= 10 −8. For LBF we used the same hyperparameters as in Overcooked-AI except for the values mentioned in the main paper.
+Category Hyperparameter Range
+Total timesteps5×10 7
+Reward shaping3×10 7
+Learning rate1×10 −3,3×10 −4,1×10 −4
+PPO epochs 4,6
+PPO minibatches 4, 6,8
+Layernorm?True, False
+UPD-specific parameters
+Buffer size (|B|) 128, 256,512
+N3,10
+Buffer refresh freq. 1, 2,4
+17
+===== PAGE 18 =====
+Unsupervised Partner Design
+uses (Wang et al., 2025). We adopt MEP from FCP and Zhao et al. (2023). SP-IPPO uses the shared PPO hyperparameters,
+except for a value function coefficient of0.5, learning rate of 2.5×10 −4, and 4 PPO epochs/minibatches. We found the
+default configuration to be unstable in standard self-play and perform substantially worse in AHT evaluation (average
+artificial-partner performance:32.4vs.41.4), so we report the stronger configuration throughout.
+Following standard practice, the training populations for FCP and MEP use MLP agents. They generally built on the same
+hyperparameters as the IPPO-SP baseline and otherwise follow Table 4. We train16 seeds each and extract 3 checkpoints
+per seed for a population size of 48. We use checkpoints at initialization, 50% of final reward, and final performance,
+following standard protocol. Our FCP population trains entirely in parallel by dividing a total of 1024 training environments
+and 2×10 8 training steps between them. The resulting FCP populations achieve high self-play returns. MEP build on FCP
+and uses a sequential training setup where one agent is trained for one PPO update cycle while the remaining agents are
+used to calculate the entropy shaping term. MEP generally uses an entropy coefficient of α= 0.01 . For MEP we found
+that the population generation hyperparameters sometimes needed to be adjusted per layout to ensure stronger results. We
+therefore tuned MEP population parameters per layout. For CC and FC we used 10 PPO epochs, 64 minibatches, and PPO
+entropy coefficient 0.03. For FC, where higher population-entropy coefficients led to unstable population learning, we used
+α= 0.001 and clipping threshold 0.1. We generally found an interaction effect between population size and α where larger
+populations generally require careful tuning to converge stably.
+ROTATE used the published hyperparameters and code as described in (Wang et al., 2025). We use these settings because
+ROTATE was tuned per Overcooked-AI layout in the original work and shows strong performance over strong baselines and
+evaluation partners that overlap with those considered here. Since their default random seed is 20374 we use 20374, 20375
+and 20376 as seeds for training. We show the full hyperparameters in Table 6. The total number of environment interactions
+ROTATE learns from is given by the number of timesteps per iteration for both the teammate and ego multiplied by the
+number of open ended iterations. Using the released implementation and hyperparameters, this corresponds to 6.0×10 7
+ego steps and2.4×10 8 total steps for CRoom/AA, and1.2×10 8 ego steps and4.4×10 8 total steps for CR/CC/FC.
+Experiments on the OGC used the exact same hyperparameters with two differences: we use an additional actor and critic
+layer (5 each) and train in 1,024 environments for1×10 9 total timesteps. SFL based methods for OGC (SFLE3T, JUPD) use
+8192 generated levels, use a rollout factor of N= 5 , ρ= 1.0 and larger buffer sizes (4096 and 16,384 ). JUPD requires a
+larger buffer since it generates 12 partners per generated level and scores the pair. Additionally, JUPD uses R= 2 . Training
+curves are shown in Figure 15, and SFLE3T achieves the highest training performance while still underperforming JUPD in
+partner-level generalisation.
+Partner PopulationsWe reuse the implementation of Wang et al. (2025) for generating artificial evaluation partners.
+BRDiv partner populations were tuned to be strong but incompatible per layout which is characterised by high self-play and
+low cross-play returns. Our hardcoded partners act independently or mechanically perform only subtasks of the overall task.
+For FC (again, because of its restrictive dynamics) we only use BRDiv and the independent partner. Since the independent
+partner cannot solve the FC task alone, it is programmed to have a 60% chance of dropping an onion or plate onto a counter
+nearby. This matches prior work (Wang et al., 2025).
+E.2. Neural Network Architecture
+We employ a recurrent actor-critic architecture for all methods in Table 1. The model comprises a shared encoder, a recurrent
+processing module, and separate heads for policy and value estimation.
+Each agent’s observation is passed through a feed-forward encoder consisting of a linear layer followed by a configurable
+number of fully connected layers (default: two layers). Each layer contains 256 hidden units with either ReLU or Tanh
+activations, optionally followed by layer normalisation. The resulting representation is used as input to the recurrent module.
+Temporal dependencies are captured using a Gated Recurrent Unit (GRU) (Cho et al., 2014) with a hidden state size of 256.
+The recurrent hidden state is reset at environment terminal states. The GRU output serves as a temporal embedding and is
+shared by both the actor and critic heads.
+The policy head processes the recurrent embedding through four fully connected layers with 256 units each and non-linear
+activations. A final linear layer outputs unnormalised logits over discrete actions, defining a categorical action distribution.
+The value head also uses the recurrent embedding as input and applies four fully connected layers with 256 units each,
+followed by a scalar output representing the state value estimate.
+18
+===== PAGE 19 =====
+Unsupervised Partner Design
+We employ theother agent modelling networkproposed by E3T. This auxiliary module models the behaviour of its teammate.
+Each agent receives the past five state-action pairs of the other agent. Observations and actions are embedded and passed
+through a four-layer multilayer perceptron (64 units per layer) to predict the teammate’s next action distribution. The
+prediction is L2-normalised and concatenated with the agent’s own embedding before being fed into the policy head. This
+auxiliary loss is optimised using a cross-entropy objective and weighted by a tunable coefficient. This is consistent with the
+original formulation (Yan et al., 2023).
+For ROTATE, we used their architecture as described in (Wang et al., 2025) to match their reported hyperparameters.
+F. Observations on Computational Requirements of UPD
+We compared the computational requirements of population-based approaches and UPD. Below, under conservative
+assumptions, we find that for our settings and any reasonably large population size ( n≥3 ) UPD can incur lower
+computational requirements. In practice, Jax-based implementations make UPD, E3T, and best response (MEP and FCP)
+training runs comparably fast; however, population pretraining dominates the runtime for both MEP and FCP, as it scales
+with the population size. In our experiments, UPD runs at close to self-play speed, given modern Jax-based environment
+simulators where policy gradient updates dominate environment steps in cost.
+In the following, we show how our curriculum compares in terms of computational requirements to common population-
+based approaches. We assume that agents are optimised using PPO (Schulman et al., 2017), but similar analysis is possible
+for different RL algorithms.
+End-to-end training with PPO has two major costs: the cost of computing an environment transition Cenv and the cost of
+updating the policy using the PPO loss via back-propagation CPPO. Let E be the number of parallel environments and H the
+number oftrainingsteps per environment per loop, so the total training batch per loop is Nsteps :=EH . In UPD, partner
+scoringusesNevaluation rollouts of lengthLsteps per candidate;Lneed not equalH.
+With a population of sizen=|P|, training the population and then a best response incurs
+Cost2 Stage ≈(n+ 1)N loops (Nsteps Cenv +C PPO).(16)
+In contrast, UPD removes population training and adds a partner-scoring term: every R PPO loops, UPD fully refreshes a
+top-|B| partner buffer by evaluating N rollouts of length L for each candidate. In the following, let K be the number of
+generated partners. Since partner generation is practically computationally free as it requires only sampling a few parameters,
+this adds
+EnvStepsUPD ≈N loops K N L
+R .(17)
+However, since candidate partners differ only by simple perturbations on the logits, we evaluate the K candidates in parallel
+(usingKsimulators), so the overhead per PPO loop scales with
+OverheadUPD ≈ N L
+R ,(18)
+rather than KN L/R. Similarly, under vectorised execution the wall-clock rollout cost scales primarily with the rollout
+horizonH, rather than the total number of environment transitionsEH.
+Thus, the total per-loop wall-clock cost for UPD is
+CostUPD ≈N loops
+ 
+HCenv +C PPO + N L
+R Cenv
+
+,(19)
+i.e., the standard PPO loop plus a tunable scoring term.
+Population methods are more expensive than UPD when
+(n+ 1) (HC env +C PPO)> HC env +C PPO + N L
+R Cenv (20)
+Solving fornyields the break-even population size
+n⋆ =
+N L
+R
+H+ CPPO
+Cenv
+.(21)
+19
+===== PAGE 20 =====
+Unsupervised Partner Design
+In the worst-case where environment transition costs dominate PPO update costs, e.g. the environment-dominated limit
+CPPO/Cenv →0,
+n⋆ = N L/R
+H .(22)
+To be cheaper than any non-trivial population (n≥1 ),it suffices that N L
+R ≤H (equivalently, n⋆ ≤1 ). More generally,
+to undercut a given population size n,it suffices that N L
+R ≤n H . In practice, choosing modest N, short L, and staggered
+refreshRkeeps N L
+R small.
+In our Overcooked-AI runs we use E= 512 , H= 400 (so Nsteps = 204,800), N= 10 , L= 400 , R= 4 , and K= 4000 ,
+giving an amortised scoring budgetN L/R= 1000. Hence
+n⋆ =
+N L
+R
+H+ CPPO
+Cenv
+= 1000
+400+ CPPO
+Cenv
+.(23)
+Two implications follow. First, if CPPO/Cenv >600 , then n⋆ <1 , i.e., even a single-partner population already exceeds
+UPD’s wall-clock overhead. Second, in the simulation-dominated extremeCPPO/Cenv →0 , we obtain n⋆ = 1000/400 =
+2.5, so any practical population with n≥3 is more expensive than UPD. Equivalently, the per-loop UPD overhead is a fixed
+1000C env, which as a fraction of the PPO update cost is 1000/(CPPO/Cenv) (vanishing when CPPO ≫C env). Note that, (1)
+in this work we are in the PPO-dominated regime since we use Jax-based simulators that run at >100000 steps/second and
+(2) that costs are even higher for methods that revolve around computing interactions between members of the population.
+The above additionally assumes that different population members are not themselves trained in parallel. If the n population
+members can themselves be trained fully in parallel (which is not true for most methods), the wall-clock cost of the
+population pretraining stage no longer scales with n. In this best-case parallel setting, a two-stage method still requires two
+sequential phases: population pretraining followed by best-response training. Its cost is therefore approximately
+Cost2 Stage, parallel ≈2N loops (HCenv +C PPO).(24)
+UPD remains cheaper when
+HCenv +C PPO > N L
+R Cenv,(25)
+or equivalently
+CPPO
+Cenv
+> N L
+R −H.(26)
+With our valuesN= 10,L= 400,R= 4, andH= 400, this threshold is
+CPPO
+Cenv
+>600.(27)
+This condition is realistic and likely conservative in our setting: our environments are lightweight Jax simulators, whileCPPO
+includes the full PPO optimisation phase over all minibatches and epochs. Empirically, UPD runs close to self-play/E3T
+speed, whereas population-based methods remain slower due to the additional pretraining stage and, for methods such as
+MEP, additional population-interaction costs.
+G. Additional Environment Details
+G.1. Level-Based Foraging
+As described in the main text, we employ Level-Based Foraging (LBF) (Albrecht & Ramamoorthy, 2013) to first compare
+E3T to UPD. In our work LBF uses a grid of 7×7 , three foods and two agents. Both agents observe the full environment.
+To collect a food, both agents need to use the load action on a food at the same time. The actions are: up, down, left,
+right, no-op, and load. On reset the locations of foods and agents are randomised. We use the Jax version of the
+environment offered by Bonnet et al. (2024) with improvements made by Wang et al. (2025) and the partner generation
+pipeline of Wang et al. (2025) for evaluation partners.
+20
+===== PAGE 21 =====
+Unsupervised Partner Design
+Figure 9.We redraw the five evaluation layouts introduced by Carroll et al. (2019) using the JaxMARL visualisation pipeline (Rutherford
+et al., 2023). From left to right: CRoom, AA, CR, CC, and FC.
+G.2. Overcooked-AI
+Overcooked-AI is a multi-agent coordination benchmark based on the Overcooked video game, originally proposed by
+Carroll et al. (2019). It features two-player cooking tasks requiring temporal coordination and spatial reasoning. Agents
+must pick up ingredients, cook them in pots, and serve dishes. The action space is discrete, consisting of six actions: move
+up, down, left, right, interact, and stay. We use the JaxMARL version (Rutherford et al., 2023) with improvements provided
+by Wang et al. (2025).
+We use the five standard layouts commonly used in ad-hoc teamwork literature (also see Figure 9): Cramped Room (CRoom),
+Asymmetric Advantages (AA), Coordination Ring (CR), Counter Circuit (CC), and Forced Coordination (FC). We use the
+implementation provided by JaxMARL and keep all reward settings at their defaults (sparse reward for serving, shaped
+reward for intermediate actions where indicated). During the shaped reward phase, agents receive a reward of 3 for placing
+an ingredient into a pot, 3 for picking up a plate while a soup is cooking, and 5 for picking up a ready soup.
+G.3. The Overcooked Generalisation Challenge
+The Overcooked Generalisation Challenge (OGC) (Ruhdorfer et al., 2025b) extends Overcooked-AI to assess zero-shot
+generalisation across both partner and level distributions. Instead of training on fixed layouts, the environment includes a
+procedural level generator that produces randomised kitchens with varying topology and difficulty.
+The challenge is particularly demanding because many generated layouts are unsolvable or require nontrivial conventions to
+coordinate efficiently.
+In our work, we use a 5×5 version of the OGC to reduce computational cost while preserving task diversity. This generator
+randomly samples kitchen structure (walls, counters, item placement) and goal configurations (e.g., number of onions per
+soup). The generator first generates a layout with walls at the border and then randomly samples a wall budget between
+1 and 10. With this budget, the system then places walls randomly. The generator also randomly adds a dividing wall or
+additional walls at the sides in order to narrow the layout. After this, the system places items on walls. Lastly, both agents
+are placed on a free tile.
+We evaluate performance on a fixed subset of small layouts used in the OGC benchmark and compare agents based on
+average return when paired with held-out agents across these generated environments.
+H. Training Curves
+We display the received training returns for all Overcooked-AI methods in Figures 10 (SP), 11 (FCP), 12 (MEP), 13 (E3T)
+and 14 (UPD). Note that these returns must be interpreted with caution. For FCP and MEP, they show the returns with
+their respective populations. For UPD and E3T, they show the received training returns based on the generated partner. All
+reported configurations converge stably. Also note that many methods achieve higher training returns compared to UPD, but,
+as has been established in the literature (Carroll et al., 2019), this is not necessarily predictive of test returns with unknown
+partners.
+In Figure 15, we display training returns for all four OGC methods. We see all methods converging. Only CEC appears to
+experience a drop in performance at the end. Again, note that training performance is not predictive of test-time performance:
+Methods that sample levels by learnability (SFLE3T, JUPD) might sample harder levels than methods that do not (DR,
+CEC), and both SFLE3T as well as JUPD do not play in a self-play setting.
+21
+===== PAGE 22 =====
+Unsupervised Partner Design
+0 1 2 3 4 5
+Environment Step 1e7
+0
+50
+100
+150
+200
+250Average Episode Return
+SP Training Returns Over Time by Layout (Mean ± Std)
+Layout
+AA
+CR
+CC
+CRoom
+FC
+Figure 10.SP training curves. We average over 6 seeds and show standard deviation.
+0 1 2 3 4 5
+Environment Step 1e7
+0
+50
+100
+150
+200Average Episode Return
+FCP Training Returns Over Time by Layout (Mean ± Std)
+Layout
+AA
+CR
+CC
+CRoom
+FC
+Figure 11.FCP training curves. We average over 6 seeds and show standard deviation.
+0 1 2 3 4 5
+Environment Step 1e7
+0
+50
+100
+150
+200Average Episode Return
+MEP Training Returns Over Time by Layout (Mean ± Std)
+Layout
+AA
+CR
+CC
+CRoom
+FC
+Figure 12.MEP training curves. We average over 6 seeds and show standard deviation.
+0 1 2 3 4 5
+Environment Step 1e7
+0
+50
+100
+150
+200Average Episode Return
+E3T Training Returns Over Time by Layout (Mean ± Std)
+Layout
+AA
+CR
+CC
+CRoom
+FC
+Figure 13.E3T training curves. We average over 6 seeds and show standard deviation.
+22
+===== PAGE 23 =====
+Unsupervised Partner Design
+0 1 2 3 4 5
+Environment Step 1e7
+0
+50
+100
+150
+200Average Episode Return
+UPD Training Returns Over Time by Layout (Mean ± Std)
+Layout
+AA
+CR
+CC
+CRoom
+FC
+Figure 14.UPD training curves. We average over 6 seeds and show standard deviation.
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Step 1e9
+0
+5
+10
+15
+20
+25Average Episode Return
+OGC Mean ± Std Training Curves
+Method
+DR
+CEC
+SFLE3T
+JUPD
+Figure 15.OGC training curves. We average over 6 seeds and show standard deviation for all methods.
+(a)Early
+ (b)Middle
+ (c)Final
+Figure 16.Learnability vs. return over training inCoordination Ring.
+(a)Early
+ (b)Middle
+ (c)Final
+Figure 17.Learnability vs. return over training inAsymmetric Advantages.
+23
+===== PAGE 24 =====
+Unsupervised Partner Design
+(a)Early
+ (b)Middle
+ (c)Final
+Figure 18.Learnability vs. return inForced Coordination.
+50 60 70 80 90 100
+Average Returns
+mean
+adaptive-SR
+gauss
+var
+Figure 19.Performance of multiple learnability functions against the evaluation population averaged over layouts. Here ℓmean selects
+partners based on their mean return, ℓgauss weights partners down that are far from the average global return (Monette et al., 2025) and
+adaptive success-rate (SR) ranks partners based on whether they exceed median performance. Simple ℓvar performs similar or better than
+more complicated measures. Additionally, UPD is robust to the learnability function as long as the function is reasonable. Researching
+other forms of partner scoring might be valuable future work in the context of UPD.
+I. Partner Curriculum Dynamics
+To better understand how UPD identifies effective training partners throughout learning in Overcooked-AI, we repeat
+our analysis from the experimental section and visualise learnability scores at different points across training. For three
+respective layouts (CR, AA, and FC), we evaluate a trained ego agent at three points during training (at 2/5, 4/5, and the
+end) by rolling out with 8,192 randomly generated partners (see Figures 16, 17, 18). We select these three layouts for the
+same reason as in the main paper: they are representative; both CRoom and CC behave very similarly to the CR case. We
+compute learnability using the same variance-based metric as during training and plot it against the corresponding mean
+return. Across all settings, we observe that learnability does not concentrate on the highest- or lowest-returning partners, nor
+does it peak where most partners lie. Instead, learnability is high for partners with intermediate difficulty. We observe that
+for most levels, the generated partners fall into low-return and low-learnability buckets. This suggests that our hypothesis –
+that not all partners are optimal for training – is correct: Most partners score low on the learnability metric. Instead, UPD
+ranks partners from middle-return buckets highest, which contain relatively few partners.
+Finally, unlike prior work on level-space curricula with binary outcomes (Rutherford et al., 2024), we observe that agents
+in our setting rarely score zero reward with any partner. Due to this and the continuous reward structure, we find that our
+learnability analysis plot conveys information not only through its shape but also via its rightward shift over time. For
+instance, in Figure 17, the lowest-scoring partner improves from around 20 to a mean return of 120. This shift suggests
+that the ego agent’s capabilities expand over time and that UPD adapts by sampling increasingly competent partners. In
+doing so, UPD not only identifies informative partners but also tracks the agent’s learning progress, adjusting the curriculum
+accordingly. A notable exception arises in tasks with strong interdependence, such as FC (see Figure 18).
+J. Additional Results in Overcooked
+J.1. Do alternative learnability functions improve results?
+We examined how different learnability functions affect partner selection and training performance. Specifically, we
+asked: (1) Does our proposed variance-based score ℓvar induce effective curricula? and (2) How sensitive is UPD to the
+choice of learnability function? We evaluated four functions across the five Overcooked-AI layouts from RQ2 using the
+following comparisons: (1) ℓmean =E τ∼(π,π p)[R(τ)], selects partners with higher expected returns. (2) We adapted the
+success-rate-based learnability of Rutherford et al. (2024) to continuous rewards by thresholding returns at the median, i.e.
+24
+===== PAGE 25 =====
+Unsupervised Partner Design
+BRDiv Indp Onion Plate Random Static
+0
+25
+50
+75
+100
+125Performance Score
+Per-Partner Performance by Method
+Method
+SP
+FCP
+MEP
+E3T
+ROTATE
+UPD
+UPDFT
+Figure 20.Per-Partner results averaged over layouts in Overcooked-AI. UPD outperforms other methods with most partners. Some
+methods show similar or even slightly better performance with the Onion and the Plate agent. However, these methods are not consistently
+better than UPD.
+using an estimated pseudo-success rate:
+ℓadaptive-SR =p·(1−p),(28)
+wherepis the fraction of rollout returns exceeding the global median return. (29)
+(3) The Gauss-weighted formulation (ℓgauss) of (Monette et al., 2025). (4) Our ℓvar. Together, these cover naive reward-driven
+and other selection strategies identified in related works.
+As shown in Figure 19, our ℓvar achieves the highest performance. Notably, UPD remains robust across alternative functions
+– as long as they avoid pathological cases (e.g., self-play). Contrary to prior findings (Monette et al., 2025), we observe that
+more complex learnability functions offer no clear benefit for UPD.
+Our experiments showed that UPD is effective at training agents for AHT, and is robust under different formulations
+of learnability as long as they do not collapse to the self-play setting. Additionally, we demonstrated that UPD can be
+integrated into standard UED, enabling fully unsupervised curricula over both environment and partner distributions. While
+we explored several learnability functions, many alternatives remain. One natural baseline is to prioritise the hardest
+partners – those with the lowest average return – as explored in prior work (Zhao et al., 2023; Li et al., 2023b; You et al.,
+2025). However, both theoretically and in preliminary experiments, we find this approach leads to adversarial dynamics.
+Specifically, in Overcooked-AI, it heavily favours near-random partners (i.e.,ϵ→1 ), while in the OGC, it favours unsolvable
+levels. In both cases, learning stagnates. This is because our setting involves an open-ended partner generator, unlike prior
+work, which relies on pre-trained or bounded populations that implicitly cap adversarial behaviour. In such constrained
+settings, prioritising ”hard” examples remains within the space of feasible coordination, whereas in (J)UPD, unconstrained
+difficulty selection can collapse the training signal entirely.
+J.1.1. PER PARTNER RESULTS
+In Figure 20, we display additional results for how UPD performs with different partners. On average and with most partners,
+UPD performs best.
+J.1.2. CURRICULUMDYNAMICS OFUPD ABLATIONS
+To better understand the role of the bias mechanism in the induced curriculum, we additionally analyse the partner-selection
+dynamics of UPD w/o bias. Figure 21 shows the average selected mixing coefficient ϵ throughout training across layouts.
+Overall, we observe curriculum dynamics similar to those of full UPD (Figure 4). The main difference occurs in CRoom,
+where UPD w/o bias converges to a lower averageϵthan full UPD.
+In contrast, UPD w/o ℓ fluctuates around a mean ϵ of 0.5 across all layouts, as expected. Additionally, we examined the
+evolution of action biases for UPD w/o ℓ. When partners are sampled uniformly without curriculum filtering, the induced
+action biases remain approximately constant throughout training and fluctuate around the random-policy prior. This suggests
+that the convention-breaking dynamics observed in Figure 6 emerge from the interaction between partner generation and
+learnability-based selection, rather than from the stochastic partner generator alone.
+25
+===== PAGE 26 =====
+Unsupervised Partner Design
+0 1 2 3 4 5
+Environment Step 1e7
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Value
+Epsilon (Partner Randomness) for UPD w/o bias
+Layout
+FC
+AA
+CR
+CC
+CRoom
+Figure 21.We show the same analysis as in Figure 4, but for UPD w/o bias. We observe similar curriculum dynamics overall: only on
+CRoom does UPD w/o bias converge to a noticeably lower averageϵcompared to full UPD.
+K. Additional User Study Details
+We employed a within-subjects design: each participant interacted with all 4 agents (SP, MEP, E3T, UPD) across 3
+Overcooked layouts (AA, CR, CC). Each agent-layout pair was played once, totalling 36 episodes per participant. Agent
+and layout order were randomised per user. Each full study lasted between 18 and 35 minutes, and participants completed a
+short tutorial prior to the main study. Games are 200 environment steps (20 points per delivery), matching prior human
+evaluation protocols (Jha et al., 2025).
+The study was conducted via a web-based interface using the NiceWebRL framework2. We recruited 12 participants (5
+female; aged 22-31) for the user study. The study was approved by our institutional ethics review board, and all participants
+gave informed consent. Compensation was provided per institutional guidelines. Participants controlled their character
+using the keyboard (arrow keys, space and the S key). Participants were not informed about the agent identities to avoid bias
+and were also unknown to the experimenter during the experiment (double-blind). After each agent interaction, participants
+rated the agent using seven 5-point Likert-scale questions (strongly disagree, disagree, neutral, agree, strongly agree). The
+questions were:
+1. I enjoyed playing with the agent.
+2. I felt that the agent’s ability to coordinate with me was: (very poor, poor, neutral, good, very good)
+3. The agent adapted to me when making decisions.
+4. The agent frequently got in my way.(negative)
+5. The agent was consistent in its actions.
+6. The agent’s actions were human-like.
+7. The agent’s behaviour was frustrating.(negative)
+We additionally allowed users to give free-form feedback at the end of the study. Responses were numerically mapped from
+1 to 5. Negative-valence questions were inverted before aggregation for our analysis on the overall subjective preference. To
+assess internal consistency of the question responses, we computed Cronbach’sα= 0.916 , suggesting strong reliability.
+This justifies aggregating scores across questions to produce a single subjective preference score per agent.
+We ran one-sided Wilcoxon signed-rank tests comparing UPD to each baseline using the hypothesis that UPD > baselines.
+To control for multiple comparisons, we applied Holm-Bonferroni correction within each question. We also tested the
+aggregated preference scores using the same procedure. Performance (reward) was analysed via one-sided paired t-tests with
+Holm correction. We provide bar plots for each survey question, showing Likert response distributions per agent, available
+in Figure 22.
+2https://github.com/KempnerInstitute/nicewebrl
+26
+===== PAGE 27 =====
+Unsupervised Partner Design
+Strongly disagree Disagree Neutral Agree Strongly agree
+Answer
+0
+5
+10
+15Count
+I enjoyed playing with the agent.
+Agent
+SP
+MEP
+E3T
+UPD
+Very poor Poor Neutral Good Very good
+Answer
+0
+5
+10
+15Count
+I felt that the agent's ability to coordinate with me was:
+Agent
+SP
+MEP
+E3T
+UPD
+Strongly disagree Disagree Neutral Agree Strongly agree
+Answer
+0
+5
+10
+15Count
+The agent adapted to me when making decisions.
+Agent
+SP
+MEP
+E3T
+UPD
+Strongly disagree Disagree Neutral Agree Strongly agree
+Answer
+0
+5
+10Count
+The agent frequently got in my way.
+Agent
+SP
+MEP
+E3T
+UPD
+Strongly disagree Disagree Neutral Agree Strongly agree
+Answer
+0
+5
+10
+15Count
+The agent was consistent in its actions.
+Agent
+SP
+MEP
+E3T
+UPD
+Strongly disagree Disagree Neutral Agree Strongly agree
+Answer
+0
+5
+10
+15Count
+The agent's actions were human-like.
+Agent
+SP
+MEP
+E3T
+UPD
+Strongly disagree Disagree Neutral Agree Strongly agree
+Response
+0
+10
+20Count
+The agent's behavior was frustrating.
+Agent
+SP
+MEP
+E3T
+UPD
+Figure 22.Distribution of human ratings for each survey question across all agents. Each bar represents the number of responses given to
+each Likert item (x-axis), with colors indicating the agent. Questions are grouped vertically and include both subjective impressions (e.g.,
+enjoyment, consistency) and collaboration quality (e.g., coordination, frustration).
+27

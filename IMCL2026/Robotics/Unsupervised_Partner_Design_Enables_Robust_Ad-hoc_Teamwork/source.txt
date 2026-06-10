@@ -1,4 +1,9 @@
 Unsupervised Partner Design Enables Robust Ad-hoc Teamwork
-ICML 2026 Oral
+ICML 2026 Oral (PMLR 306), Seoul, South Korea
 arXiv: https://arxiv.org/abs/2508.06336
 PDF: https://arxiv.org/pdf/2508.06336
+
+Versions tracked here:
+- v1 (2025-08-08): Unsupervised_Partner_Design__arXiv-2508.06336v1.pdf  -> translation_ko_v1.md
+- v2 (2026-06-07, latest): Unsupervised_Partner_Design__arXiv-2508.06336v2.pdf -> translation_ko_v2.md
+  (extracted text: extracted_text_v1.txt / extracted_text_v2.txt)
