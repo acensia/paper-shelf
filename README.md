@@ -11,7 +11,7 @@ Currently tracks a curated selection from **ICML 2026** (Seoul, July 6–11, 202
 .
 ├── README.md            ← you are here (repo structure & conventions)
 ├── .gitignore           ← excludes PDFs and .DS_Store
-└── IMCL2026/
+└── ICML2026/
     ├── README.md        ← curated content index (papers + abstracts)
     ├── report.md        ← long-form notes / write-up
     ├── <Category>/
@@ -30,8 +30,8 @@ Currently tracks a curated selection from **ICML 2026** (Seoul, July 6–11, 202
   - `<title>__arXiv-<id>.pdf` — the author preprint (when available).
   - `source.txt` — title, venue/track, and links (arXiv, OpenReview).
   - `NO_PDF_AVAILABLE.txt` — placeholder when no preprint exists yet, in place of the PDF.
-- **Orals / top categories** live directly under `IMCL2026/<Category>/`.
-- **Spotlights** are grouped under `IMCL2026/Spotlights/<Category>/`.
+- **Orals / top categories** live directly under `ICML2026/<Category>/`.
+- **Spotlights** are grouped under `ICML2026/Spotlights/<Category>/`.
 
 ## ICML 2026 contents
 
@@ -53,7 +53,7 @@ Currently tracks a curated selection from **ICML 2026** (Seoul, July 6–11, 202
 
 ~215 papers total · 102 with PDFs · 113 awaiting preprints.
 
-See [`IMCL2026/README.md`](IMCL2026/README.md) for the full annotated index with abstracts.
+See [`ICML2026/README.md`](ICML2026/README.md) for the full annotated index with abstracts.
 
 ## A note on PDFs
 
