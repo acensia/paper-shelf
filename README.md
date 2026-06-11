@@ -3,7 +3,9 @@
 A personal shelf of machine-learning research papers, organized by venue and topic.
 Each paper gets its own folder holding the source PDF and a small metadata file.
 
-Currently tracks a curated selection from **ICML 2026** (Seoul, July 6–11, 2026).
+Currently tracks a curated selection from **ICML 2026** (Seoul, July 6–11, 2026), plus a
+topic collection on **long-horizon tasks** (LLM / VLM / VLA, 2026 papers) kept as a git
+submodule at [`LongHorizon/`](https://github.com/acensia/long-horizon-papers).
 
 ## Repository structure
 
@@ -11,6 +13,10 @@ Currently tracks a curated selection from **ICML 2026** (Seoul, July 6–11, 202
 .
 ├── README.md            ← you are here (repo structure & conventions)
 ├── .gitignore           ← excludes PDFs and .DS_Store
+├── LongHorizon/         ← git submodule: long-horizon task papers (LLM/VLM/VLA)
+│   ├── README.md        ← annotated index, sorted newest-first
+│   ├── LLM/ · VLM/ · VLA/
+│   │   └── <Paper_Title>/ (same per-paper layout as below)
 └── ICML2026/
     ├── README.md        ← curated content index (papers + abstracts)
     ├── report.md        ← long-form notes / write-up

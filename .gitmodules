@@ -1,0 +1,3 @@
+[submodule "LongHorizon"]
+	path = LongHorizon
+	url = https://github.com/acensia/long-horizon-papers.git
