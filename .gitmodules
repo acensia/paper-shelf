@@ -1,3 +1,6 @@
 [submodule "LongHorizon"]
 	path = LongHorizon
 	url = https://github.com/acensia/long-horizon-papers.git
+[submodule "VLAStudy"]
+	path = VLAStudy
+	url = https://github.com/acensia/vla-study.git
