@@ -126,13 +126,6 @@ To improve generalization and resilience in human-robot collaboration (HRC), rob
 
 📄 PDF downloaded · [ICML](https://icml.cc/virtual/2026/oral/71075) · [arXiv](https://arxiv.org/abs/2603.03741)
 
-#### Unsupervised Partner Design Enables Robust Ad-hoc Teamwork
-*Constantin Ruhdorfer, Matteo Bortoletto, Victor Oei, Anna Penzkofer, +1 more*
-
-We introduce Unsupervised Partner Design (UPD) - a population-free, multi-agent reinforcement learning framework for robust ad-hoc teamwork that adaptively generates training partners without requiring pretrained partners or manual parameter tuning. UPD constructs diverse partners by stochastically mixing an ego agent's policy with biased random behaviours and scores them using a variance-based learnability metric that prioritises partners near the ego agent's current learning frontier. We show that UPD can be integrated with unsupervised environment design, resulting in the first method enabling fully unsupervised curricula over both level and partner distributions in a cooperative setting. Through extensive evaluations on Overcooked-AI and the Overcooked Generalisation Challenge, we demonstrate that this dynamic partner curriculum is highly effective: UPD consistently outperforms both population-based and population-free baselines as well as ablations. In a user study, we further show that UPD achieves higher returns than all baselines and was perceived as significantly more adaptive, more human-like, a better collaborator, and less frustrating.
-
-📄 PDF downloaded · [ICML](https://icml.cc/virtual/2026/oral/71078) · [arXiv](https://arxiv.org/abs/2508.06336)
-
 
 ### 🧭 Agents / Benchmarks
 
@@ -159,7 +152,7 @@ Multimodal agents offer a promising path to automating complex document-intensiv
 
 ## Additional Orals — from `report.md` cross-reference
 
-These 7 are ICML 2026 **Orals** outside the original 3-area shortlist (theory, trust, spatial/3D, causality, RL, interpretability). Added with new category folders. Only those with a public arXiv preprint have a PDF; the rest carry a placeholder until PMLR publishes.
+These 8 are ICML 2026 **Orals** filed under categories outside the original 3-area shortlist (theory, trust, spatial/3D, causality, RL, interpretability). Added with new category folders. Only those with a public arXiv preprint have a PDF; the rest carry a placeholder until PMLR publishes. (UPD was reclassified here from Robotics — it is multi-agent RL on Overcooked, not robotics.)
 
 ### 🌐 Theory / World Modeling
 
@@ -190,6 +183,13 @@ The pursuit of spatial intelligence fundamentally relies on access to large-scal
 
 
 ### 🎮 Reinforcement Learning
+
+#### Unsupervised Partner Design Enables Robust Ad-hoc Teamwork
+*Constantin Ruhdorfer, Matteo Bortoletto, Victor Oei, Anna Penzkofer, +1 more*
+
+We introduce Unsupervised Partner Design (UPD) - a population-free, multi-agent reinforcement learning framework for robust ad-hoc teamwork that adaptively generates training partners without requiring pretrained partners or manual parameter tuning. UPD constructs diverse partners by stochastically mixing an ego agent's policy with biased random behaviours and scores them using a variance-based learnability metric that prioritises partners near the ego agent's current learning frontier. We show that UPD can be integrated with unsupervised environment design, resulting in the first method enabling fully unsupervised curricula over both level and partner distributions in a cooperative setting. Through extensive evaluations on Overcooked-AI and the Overcooked Generalisation Challenge, we demonstrate that this dynamic partner curriculum is highly effective: UPD consistently outperforms both population-based and population-free baselines as well as ablations. In a user study, we further show that UPD achieves higher returns than all baselines and was perceived as significantly more adaptive, more human-like, a better collaborator, and less frustrating.
+
+📄 PDF downloaded · [ICML](https://icml.cc/virtual/2026/oral/71078) · [arXiv](https://arxiv.org/abs/2508.06336)
 
 #### Video-Based Optimal Transport for Feedback-Efficient Offline Preference-Based Reinforcement Learning
 ⏳ no preprint yet (PMLR after conf.) · [ICML](https://icml.cc/virtual/2026/oral/71090) · [OpenReview](https://openreview.net/forum?id=G8LVO5easu)
