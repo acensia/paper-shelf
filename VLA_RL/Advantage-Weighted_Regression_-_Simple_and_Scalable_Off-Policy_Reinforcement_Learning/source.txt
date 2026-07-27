@@ -1,0 +1,6 @@
+Advantage-Weighted Regression: Simple and Scalable Off-Policy Reinforcement Learning
+arXiv preprint, Oct 2019 (Peng, Kumar, Zhang, Levine)
+arXiv: https://arxiv.org/abs/1910.00177
+PDF: https://arxiv.org/pdf/1910.00177
+Project: https://xbpeng.github.io/projects/AWR/index.html
+Code: https://github.com/xbpeng/awr
