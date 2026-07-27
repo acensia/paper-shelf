@@ -1,0 +1,4 @@
+Learning to Fold: prizewinning solution at LeHome Challenge 2026 (1st place online, 2nd offline)
+LeHome Challenge @ ICRA 2026 (arXiv v2, Jul 2026; Ilia Larchenko)
+arXiv: https://arxiv.org/abs/2606.27163
+PDF: https://arxiv.org/pdf/2606.27163
