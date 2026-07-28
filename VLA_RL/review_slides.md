@@ -102,7 +102,9 @@ Two quantities we will use constantly:
 $$V^\pi(s) = \mathbb{E}\!\left[R_{s}\,\middle|\,\pi\right], \qquad A^\pi(s,a) = R^\pi_{s,a} - V^\pi(s)$$
 
 <div class="box">
+
 <b>Advantage</b> $A^\pi(s,a)$: how much better is taking $a$ in $s$ than what $\pi$ would have done on average? Positive = do more of this. This is the only signal any of the three papers ultimately uses.
+
 </div>
 
 ---
@@ -121,7 +123,9 @@ $$\nabla_\theta J(\pi_\theta) = \mathbb{E}_{\pi_\theta}\!\left[\nabla_\theta \lo
 - **Sample-hungry.** Every gradient step needs fresh environment interaction — fatal for real robots.
 
 <div class="box warn">
+
 Requires a tractable $\log \pi_\theta(a|s)$. Remember this — it is exactly what breaks in Part 3.
+
 </div>
 
 ---
@@ -220,7 +224,9 @@ Goal: find $\pi$ maximizing the expected improvement over a **sampling policy** 
 $$\eta(\pi) = J(\pi) - J(\mu) = \mathbb{E}_{s\sim d_\pi}\mathbb{E}_{a\sim\pi}\!\left[A^\mu(s,a)\right] = \mathbb{E}_{s\sim d_\pi}\mathbb{E}_{a\sim\pi}\!\left[R^\mu_{s,a} - V^\mu(s)\right]$$
 
 <div class="box">
+
 <b>This is the pivotal choice.</b> RWR and REPS maximize $J(\pi)$; AWR maximizes $J(\pi) - J(\mu)$. Since the two differ by a constant they have the same argmax — but they lead to <i>different surrogate objectives</i>, and the improvement form is the one whose integrand is the <b>advantage</b>. That baseline is what survives into the final weights.
+
 </div>
 
 $d_\pi$ still depends on $\pi$, so approximate it with $\mu$'s state distribution (Kakade & Langford 2002; Schulman 2015):
@@ -301,7 +307,9 @@ Regressing <b>one</b> value function on the <b>whole buffer</b> lands exactly on
 | Buffer | 50k FIFO, 2k samples/iter | 200 value steps + 1000 policy steps per iteration |
 
 <div class="box">
+
 <b>The replay buffer is a trust region.</b> $\mu$ is <i>defined</i> by the buffer, so a bigger buffer changes $\mu$ more slowly, which — through the KL penalty — keeps $\pi$ from moving fast. Buffer size trades stability against learning speed. This is a genuinely nice consequence of the derivation.
+
 </div>
 
 ---
@@ -455,7 +463,9 @@ A general sparse reward that applies to essentially any task — derived from a 
 $$r_t = \begin{cases} 0 & t = T \text{ and success} \\ -C_{\text{fail}} & t = T \text{ and failure} \\ -1 & \text{otherwise}\end{cases}$$
 
 <div class="box">
+
 So $V$ learns <b>the negative number of steps remaining until success</b> — a large negative constant for episodes that fail. Normalized per task to $(-1, 0)$ so tasks of different lengths are comparable. One reward definition, every task.
+
 </div>
 
 **Distributional** value function: discretize the empirical return $R_t(\tau)$ into $B=201$ bins, minimize cross-entropy:
@@ -489,7 +499,9 @@ $$\boxed{\ \hat\pi(a|o,\ell) \propto \pi_{\text{ref}}(a|o,\ell)\left(\frac{\pi_{
 $$\hat\pi(a|o,\ell) \propto \pi_{\text{ref}}(a|o,\ell)\left(\frac{\pi_{\text{ref}}(a|I,o,\ell)}{\pi_{\text{ref}}(a|o,\ell)}\right)^{\beta} \qquad\xrightarrow{\ \beta=1\ }\qquad \hat\pi(a|o,\ell) = \pi_{\text{ref}}(a|I,o,\ell)$$
 
 <div class="box good">
+
 At $\beta = 1$ the improved policy <b>is just the behavior policy conditioned on "this action was an improvement."</b> No explicit $p(I|A)$, no importance weights, no log-likelihood ratio. Train one model that can represent both $\pi_{\text{ref}}(a|o)$ and $\pi_{\text{ref}}(a|I,o)$ — exactly the classifier-free guidance construction — and $\beta>1$ comes free as CFG at inference.
+
 </div>
 
 The training objective is then plain conditional maximum likelihood over **all** the data:
@@ -509,8 +521,10 @@ For flow matching, $\log\pi_\theta$ is replaced by its lower bound: discrete-tok
 The advantage indicator is literally injected as a text token in the prompt:
 
 <div class="box">
+
 <code>"Advantage: positive"</code> when $I_t = \text{True}$<br>
 <code>"Advantage: negative"</code> otherwise
+
 </div>
 
 Placed **after** the predicted subtask $\hat\ell$ but **before** the actions, so only the action log-likelihoods are affected.
@@ -796,7 +810,9 @@ $$\theta^* \hat V, \qquad \theta^* = \rho(\hat V, V)\frac{\sigma(V)}{\sigma(\hat
 → collapses to full subtraction for a perfect predictor, to zero for a random one. The second form is **directly estimable from rollouts**.
 
 <div class="box warn">
+
 <b>Honest footnote from the author:</b> during the competition he believed $\theta^*$ was not computable and used a fixed $\alpha_s = 0.5$ instead. Post-hoc, the true per-garment coefficient ranged 0.4–0.8 with 0.5 near the median — so the mistake was not critical. Damping also <i>partially</i> un-cancels the checkpoint rewards (problem 1), which is why checkpoint moments retain positive advantage.
+
 </div>
 
 ---
