@@ -109,6 +109,41 @@ $$V^\pi(s) = \mathbb{E}\!\left[R_{s}\,\middle|\,\pi\right], \qquad A^\pi(s,a) = 
 
 ---
 
+## On-policy vs. off-policy — the axis the routes differ on
+
+Before comparing algorithms, one distinction: **whose data are you learning from?**
+
+<div class="cols">
+<div>
+
+### On-policy
+The update assumes the data was collected by the **current** policy $\pi_\theta$.
+
+- Collect fresh rollouts → take a gradient step → **throw the data away.**
+- Statistically clean: expectations under $\pi_\theta$ are estimated with samples *from* $\pi_\theta$.
+- Cost: every update requires new environment interaction.
+
+</div>
+<div>
+
+### Off-policy
+The update can consume data from a **different** policy $\mu$: past iterations of the agent, scripted controllers, human demonstrations.
+
+- Store everything in a replay buffer, reuse it many times.
+- Far more sample-efficient.
+- Cost: a **distribution mismatch** — the data no longer reflects what the current policy would do, and something must correct for that (importance weights, trust regions, …).
+
+</div>
+</div>
+
+<div class="box">
+
+**Why this axis matters here:** on a real robot one sample is minutes of wall-clock, and the best data (demos, corrections) comes from humans — who are by definition not the current policy. So robot learning *must* be off-policy. The three routes that follow are three different prices paid for that: Route A refuses to pay (stays on-policy), Route B pays in stability, Route C pays with a trust region — and that is the route AWR takes.
+
+</div>
+
+---
+
 ## Route A: policy gradients
 
 Differentiate $J$ directly and ascend:
